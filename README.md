@@ -1,4 +1,4 @@
-# neuland.app-core-api
+# app-backend-core
 
 Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, audit.
 
@@ -13,7 +13,7 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 ## Related repos
 
-- [neuland.app-contracts](https://github.com/neuland-ingolstadt/neuland.app-contracts) — OpenAPI specs
-- [neuland.app-food-service](https://github.com/neuland-ingolstadt/neuland.app-food-service) — food data (called by Public API)
-- [neuland.app-cloud-gateway](https://github.com/neuland-ingolstadt/neuland.app-cloud-gateway) — external entry point
+- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs
+- [app-backend-food](https://github.com/neuland-ingolstadt/app-backend-food) — food data (called by Public API)
+- [app-backend-cloud-gateway](https://github.com/neuland-ingolstadt/app-backend-cloud-gateway) — external entry point
 - [neuland.app-backend](https://github.com/neuland-ingolstadt/neuland.app-backend) — legacy GraphQL backend (to be retired)
