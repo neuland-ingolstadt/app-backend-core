@@ -21,9 +21,6 @@ bin/
 *.iml
 *.iws
 
-# VSCode
-.vscode
-
 # NetBeans
 nb-configuration.xml
 
