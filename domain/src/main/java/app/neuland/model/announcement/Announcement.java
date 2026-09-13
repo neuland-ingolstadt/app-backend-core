@@ -1,14 +1,15 @@
-package domain.model.announcement;
+package app.neuland.model.announcement;
 
 import java.util.Set;
 import java.util.Map;
 import java.time.Instant;
+import app.neuland.model.user.*;
 
-public record Announcement {
+public record Announcement (
     Long id,
     Set<Platform> platforms,
     Set<UserKind> userKinds,
-    Map<LanguageEnum, AnnouncentContent> contents,
+    Map<Language, AnnouncementContent> contents,
     Instant startDateTime,
     Instant endDateTime,
     Integer priority,
