@@ -1,4 +1,4 @@
-package app.neuland.model;
+package app.neuland.domain.universitySports;
 
 public enum Weekday {
     MONDAY,

@@ -1,4 +1,4 @@
-package app.neuland.model;
+package app.neuland.domain.shared;
 
 import java.util.regex.Pattern;
 
