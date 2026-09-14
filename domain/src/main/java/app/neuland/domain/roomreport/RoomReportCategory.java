@@ -1,4 +1,4 @@
-package domain.model.roomreport;
+package app.neuland.domain.roomreport;
 
 public enum RoomReportCategory {
     WRONG_DESCRIPTION,
