@@ -3,7 +3,6 @@ package app.neuland.model.announcement;
 import java.util.Set;
 import java.util.Map;
 import java.time.Instant;
-import app.neuland.model.user.*;
 
 public record Announcement (
     Long id,
@@ -14,8 +13,5 @@ public record Announcement (
     Instant endDateTime,
     Integer priority,
     String url,
-    String imageUrl,
-    User createdBy,
-    Instant createdAt,
-    Instant updatedAt
+    String imageUrl
 ) {}
