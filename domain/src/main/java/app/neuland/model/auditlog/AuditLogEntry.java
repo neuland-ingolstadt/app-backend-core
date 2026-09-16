@@ -9,5 +9,5 @@ public record AuditLogEntry (
         AuditLogOperation operation,
         String name,
         String userId,
-        Instant createdAt
+        Instant occurredAt
 ) {}
