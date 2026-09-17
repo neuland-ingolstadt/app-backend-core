@@ -1,4 +1,4 @@
-package app.neuland.domain.roomreport;
+package app.neuland.model.roomreport;
 
 public record RoomReport(
         Long id,
