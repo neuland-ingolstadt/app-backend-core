@@ -3,7 +3,6 @@ package app.neuland.domain.universitysports;
 import app.neuland.domain.shared.Language;
 
 import java.util.Map;
-import java.time.Instant;
 import java.time.LocalTime;
 
 public record Sports(Long id,
@@ -16,10 +15,7 @@ public record Sports(Long id,
                      boolean requiresRegistration,
                      String invitationLink,
                      String email,
-                     SportsCategory sportsCategory,
-                     String createdBy,
-                     Instant createdAt,
-                     Instant updatedAt) {
+                     SportsCategory sportsCategory) {
 
     public Sports {
         contents = contents == null ? null : Map.copyOf(contents);
