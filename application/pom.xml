@@ -10,4 +10,13 @@
     </parent>
 
     <artifactId>application</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>app.neuland</groupId>
+            <artifactId>domain</artifactId>
+            <version>${project.version}</version>
+        </dependency>
+    </dependencies>
+
 </project>
