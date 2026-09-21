@@ -6,7 +6,7 @@ import java.util.List;
 public interface RoomReportUseCase {
     List<RoomReport> list();
 
-    RoomReport create(RoomReport report);
+    Long create(RoomReport report);
 
-    RoomReport resolve(long id, boolean resolved);
+    Long resolve(long id, boolean resolved);
 }
