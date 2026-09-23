@@ -38,7 +38,13 @@ Build and test everything:
 ./mvnw verify
 ```
 
-Run the bootstrap application in dev mode:
+Run the bootstrap application in dev mode (from the repo root):
+
+```shell script
+quarkus dev
+```
+
+Or with Maven (targets bootstrap and also-makes its dependencies):
 
 ```shell script
 ./mvnw quarkus:dev -pl bootstrap -am
@@ -50,4 +56,4 @@ Package the runnable application:
 ./mvnw package -pl bootstrap -am
 ```
 
-The `-pl` flag targets the bootstrap module specifically, and `-am` ("also make") builds the modules it depends on first.
+Prefer the Quarkus CLI from the root. The Maven form uses `-pl bootstrap` for the app module and `-am` to build its dependencies first.
