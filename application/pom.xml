@@ -10,7 +10,6 @@
     </parent>
 
     <artifactId>application</artifactId>
-    <packaging>jar</packaging>
 
     <dependencies>
         <dependency>
@@ -19,4 +18,5 @@
             <version>${project.version}</version>
         </dependency>
     </dependencies>
+
 </project>
