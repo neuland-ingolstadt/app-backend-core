@@ -41,7 +41,7 @@ Build and test everything:
 Run the bootstrap application in dev mode:
 
 ```shell script
-./mvnw quarkus:dev -pl bootstrap
+./mvnw quarkus:dev -pl bootstrap -am
 ```
 
 Package the runnable application:

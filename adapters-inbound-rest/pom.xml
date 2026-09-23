@@ -5,9 +5,17 @@
     <modelVersion>4.0.0</modelVersion>
     <parent>
         <groupId>app.neuland</groupId>
-        <artifactId>parent</artifactId>
+        <artifactId>app-backend-core</artifactId>
         <version>0.0.1</version>
     </parent>
 
     <artifactId>adapters-inbound-rest</artifactId>
+
+    <dependencies>
+        <dependency>
+            <groupId>app.neuland</groupId>
+            <artifactId>application</artifactId>
+        </dependency>
+    </dependencies>
+
 </project>
