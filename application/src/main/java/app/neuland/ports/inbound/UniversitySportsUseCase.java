@@ -1,6 +1,6 @@
 package app.neuland.ports.inbound;
 
-import app.neuland.domain.universitysports.Sports;
+import app.neuland.model.universitysports.Sports;
 import java.util.List;
 
 public interface UniversitySportsUseCase {

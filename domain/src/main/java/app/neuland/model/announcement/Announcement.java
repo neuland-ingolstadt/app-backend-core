@@ -1,5 +1,6 @@
 package app.neuland.model.announcement;
 
+import app.neuland.model.shared.Language;
 import java.util.Set;
 import java.util.Map;
 import java.time.Instant;
