@@ -1,4 +1,4 @@
-package app.neuland.domain.shared;
+package app.neuland.model.shared;
 
 public enum Language {
     DE,

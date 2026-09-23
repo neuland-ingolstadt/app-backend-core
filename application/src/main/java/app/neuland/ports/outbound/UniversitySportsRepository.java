@@ -1,6 +1,6 @@
 package app.neuland.ports.outbound;
 
-import app.neuland.domain.universitysports.Sports;
+import app.neuland.model.universitysports.Sports;
 import java.util.List;
 import java.util.Optional;
 

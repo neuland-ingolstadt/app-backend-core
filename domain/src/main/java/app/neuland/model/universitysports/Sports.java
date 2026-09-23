@@ -1,7 +1,6 @@
-package app.neuland.domain.universitysports;
+package app.neuland.model.universitysports;
 
-import app.neuland.domain.shared.Language;
-
+import app.neuland.model.shared.Language;
 import java.util.Map;
 import java.time.LocalTime;
 

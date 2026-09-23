@@ -1,4 +1,4 @@
-package app.neuland.domain.universitysports;
+package app.neuland.model.universitysports;
 
 public record SportsContent(String title, String description) {
 
