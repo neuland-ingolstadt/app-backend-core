@@ -31,9 +31,6 @@ public class RoomReportResource {
     public RoomReportResponse list() {
         return new RoomReportResponse(
                 roomReportUseCase.list()
-                .stream()
-                .map(RoomReportResponse::from)
-                .toList()
         );
     }
 
