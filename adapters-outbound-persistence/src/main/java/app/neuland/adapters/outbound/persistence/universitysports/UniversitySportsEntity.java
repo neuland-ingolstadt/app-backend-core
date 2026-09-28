@@ -54,6 +54,6 @@ public class UniversitySportsEntity extends PanacheEntityBase {
     public String email;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "sports_category", nullable = false)
     public SportsCategory sportsCategory;
 }
