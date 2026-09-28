@@ -1,7 +1,6 @@
 package app.neuland.adapters.inbound.rest.roomreports;
 
 import app.neuland.model.roomreport.RoomReport;
-import app.neuland.model.roomreport.RoomReportCategory;
 
 import java.util.List;
 
