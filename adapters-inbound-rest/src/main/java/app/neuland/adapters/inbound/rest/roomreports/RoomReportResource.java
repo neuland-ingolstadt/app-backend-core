@@ -28,8 +28,8 @@ public class RoomReportResource {
     }
 
     @GET
-    public RoomReportResponse list() {
-        return new RoomReportResponse(
+    public RoomReportListResponse list() {
+        return new RoomReportListResponse(
                 roomReportUseCase.list()
         );
     }

@@ -95,7 +95,7 @@ class RoomReportResourceTest {
                 .then()
                 .statusCode(400)
                 .body("status", is(400))
-                .body("violations[0].field", is("create.request.room"));
+                .body("violations[0].message", is("must not be blank"));
     }
 
     @Test
@@ -141,7 +141,7 @@ class RoomReportResourceTest {
                 .when().patch("/room-reports/3")
                 .then()
                 .statusCode(400)
-                .body("violations[0].field", is("resolve.request.resolved"));
+                .body("violations[0].message", is("must not be null"));
     }
 
     @Test

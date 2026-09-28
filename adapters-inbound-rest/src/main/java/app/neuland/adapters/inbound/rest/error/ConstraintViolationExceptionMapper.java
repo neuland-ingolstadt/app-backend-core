@@ -22,7 +22,7 @@ public class ConstraintViolationExceptionMapper
 
         String detail = violations
                 .stream()
-                .map(FieldViolation::toString)
+                .map(FieldViolation::toDetail)
                 .collect(Collectors.joining(", "));
 
         return Response

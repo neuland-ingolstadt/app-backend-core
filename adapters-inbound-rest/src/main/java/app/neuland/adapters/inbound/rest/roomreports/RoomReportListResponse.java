@@ -4,6 +4,7 @@ import app.neuland.model.roomreport.RoomReport;
 
 import java.util.List;
 
-public record RoomReportResponse(
+public record RoomReportListResponse(
         List<RoomReport> roomReports
-) {}
+) {
+}
