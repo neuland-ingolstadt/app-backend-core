@@ -1,4 +1,4 @@
-package app.neuland.implementation;
+package app.neuland.implementation.roomreports;
 
 public class RoomReportNotFoundException extends RuntimeException {
 
