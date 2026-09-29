@@ -1,11 +1,14 @@
 package app.neuland.adapters.outbound.persistence.universitysports;
 
+import app.neuland.model.shared.Language;
 import app.neuland.model.universitysports.Campus;
 import app.neuland.model.universitysports.SportsCategory;
 import app.neuland.model.universitysports.Weekday;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
 
 @Entity
 @Table(name = "university_sports")
@@ -15,17 +18,14 @@ public class UniversitySportsEntity extends PanacheEntityBase {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     public Long id;
 
-    @Column(name = "title_de", nullable = false)
-    public String titleDe;
-
-    @Column(name = "description_de")
-    public String descriptionDe;
-
-    @Column(name = "title_en", nullable = false)
-    public String titleEn;
-
-    @Column(name = "description_en")
-    public String descriptionEn;
+    @ElementCollection
+    @CollectionTable(
+            name = "university_sports_contents",
+            joinColumns = @JoinColumn(name = "university_sports_id")
+    )
+    @MapKeyEnumerated(EnumType.STRING)
+    @MapKeyColumn(name = "language", nullable = false)
+    public Map<Language, UniversitySportsContentEmbeddable> contents = new HashMap<>();
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
