@@ -11,6 +11,7 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @ApplicationScoped
@@ -25,12 +26,14 @@ public class AnnouncementRepositoryAdapter
     }
 
     @Override
+    @Transactional
     public Optional<Announcement> findById(long id) {
         return Optional.ofNullable(repository.findById(id))
                 .map(this::toDomain);
     }
 
     @Override
+    @Transactional
     public List<Announcement> findAll() {
         return repository.listAll()
                 .stream()
@@ -39,6 +42,7 @@ public class AnnouncementRepositoryAdapter
     }
 
     @Override
+    @Transactional
     public List<Announcement> findActiveAt(Instant at) {
         return repository
                 .find(
@@ -58,6 +62,7 @@ public class AnnouncementRepositoryAdapter
 
         if (announcement.id() == null) {
             entity = new AnnouncementEntity();
+            applyToEntity(announcement, entity);
             repository.persist(entity);
         } else {
             entity = repository.findById(announcement.id());
@@ -67,31 +72,9 @@ public class AnnouncementRepositoryAdapter
                         "Announcement not found: " + announcement.id()
                 );
             }
+
+            applyToEntity(announcement, entity);
         }
-
-        entity.platforms.clear();
-        entity.platforms.addAll(announcement.platforms());
-
-        entity.userKinds.clear();
-        entity.userKinds.addAll(announcement.userKinds());
-
-        entity.contents.clear();
-
-        announcement.contents().forEach((language, content) -> {
-            AnnouncementContentEmbeddable embeddable =
-                    new AnnouncementContentEmbeddable();
-
-            embeddable.title = content.title();
-            embeddable.description = content.description();
-
-            entity.contents.put(language, embeddable);
-        });
-
-        entity.startDateTime = announcement.startDateTime();
-        entity.endDateTime = announcement.endDateTime();
-        entity.priority = announcement.priority();
-        entity.url = announcement.url();
-        entity.imageUrl = announcement.imageUrl();
 
         return toDomain(entity);
     }
@@ -110,6 +93,31 @@ public class AnnouncementRepositoryAdapter
         repository.delete(entity);
     }
 
+    private void applyToEntity(Announcement announcement, AnnouncementEntity entity) {
+        entity.platforms.clear();
+        entity.platforms.addAll(announcement.platforms());
+
+        entity.userKinds.clear();
+        entity.userKinds.addAll(announcement.userKinds());
+
+        entity.contents.clear();
+        announcement.contents().forEach((language, content) -> {
+            AnnouncementContentEmbeddable embeddable =
+                    new AnnouncementContentEmbeddable();
+
+            embeddable.title = content.title();
+            embeddable.description = content.description();
+
+            entity.contents.put(language, embeddable);
+        });
+
+        entity.startDateTime = announcement.startDateTime();
+        entity.endDateTime = announcement.endDateTime();
+        entity.priority = announcement.priority();
+        entity.url = announcement.url();
+        entity.imageUrl = announcement.imageUrl();
+    }
+
     private Announcement toDomain(AnnouncementEntity entity) {
         Map<Language, AnnouncementContent> contents =
                 entity.contents.entrySet()
@@ -124,8 +132,8 @@ public class AnnouncementRepositoryAdapter
 
         return new Announcement(
                 entity.id,
-                entity.platforms,
-                entity.userKinds,
+                Set.copyOf(entity.platforms),
+                Set.copyOf(entity.userKinds),
                 contents,
                 entity.startDateTime,
                 entity.endDateTime,
