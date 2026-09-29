@@ -10,6 +10,7 @@ import jakarta.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ApplicationScoped
 public class UniversitySportsRepositoryAdapter
@@ -23,12 +24,14 @@ public class UniversitySportsRepositoryAdapter
     }
 
     @Override
+    @Transactional
     public Optional<Sports> findById(long id) {
         return Optional.ofNullable(repository.findById(id))
                 .map(this::toDomain);
     }
 
     @Override
+    @Transactional
     public List<Sports> findAll() {
         return repository.listAll()
                 .stream()
@@ -67,13 +70,18 @@ public class UniversitySportsRepositoryAdapter
     }
 
     private void applyToEntity(Sports sport, UniversitySportsEntity entity) {
-        SportsContent de = requireContent(sport, Language.DE);
-        SportsContent en = requireContent(sport, Language.EN);
+        requireContent(sport, Language.DE);
+        requireContent(sport, Language.EN);
 
-        entity.titleDe = de.title();
-        entity.descriptionDe = de.description();
-        entity.titleEn = en.title();
-        entity.descriptionEn = en.description();
+        entity.contents.clear();
+        sport.contents().forEach((language, content) -> {
+            UniversitySportsContentEmbeddable embeddable =
+                    new UniversitySportsContentEmbeddable();
+            embeddable.title = content.title();
+            embeddable.description = content.description();
+            entity.contents.put(language, embeddable);
+        });
+
         entity.campus = sport.campus();
         entity.location = sport.location();
         entity.weekday = sport.weekday();
@@ -98,14 +106,20 @@ public class UniversitySportsRepositoryAdapter
     }
 
     private Sports toDomain(UniversitySportsEntity entity) {
+        Map<Language, SportsContent> contents =
+                entity.contents.entrySet()
+                        .stream()
+                        .collect(Collectors.toMap(
+                                Map.Entry::getKey,
+                                entry -> new SportsContent(
+                                        entry.getValue().title,
+                                        entry.getValue().description
+                                )
+                        ));
+
         return new Sports(
                 entity.id,
-                Map.of(
-                        Language.DE, new SportsContent(
-                                entity.titleDe, entity.descriptionDe),
-                        Language.EN, new SportsContent(
-                                entity.titleEn, entity.descriptionEn)
-                ),
+                contents,
                 entity.campus,
                 entity.location,
                 entity.weekday,
