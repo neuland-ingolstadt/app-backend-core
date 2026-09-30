@@ -3,5 +3,5 @@ CREATE TABLE room_reports (
     room VARCHAR(255) NOT NULL,
     reason VARCHAR(50) NOT NULL,
     description TEXT NOT NULL,
-    resolved BOOLEAN NOT NULL
+    resolved_at TIMESTAMP WITH TIME ZONE
 );
