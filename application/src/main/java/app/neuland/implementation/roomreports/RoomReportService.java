@@ -4,6 +4,7 @@ import app.neuland.model.roomreport.RoomReport;
 import app.neuland.ports.inbound.RoomReportUseCase;
 import app.neuland.ports.outbound.RoomReportRepository;
 
+import java.time.Instant;
 import java.util.List;
 
 public class RoomReportService implements RoomReportUseCase {
@@ -26,7 +27,7 @@ public class RoomReportService implements RoomReportUseCase {
                 report.room(),
                 report.reason(),
                 report.description(),
-                false
+                null
         );
         return roomReportRepository.save(toCreate).id();
     }
@@ -37,12 +38,16 @@ public class RoomReportService implements RoomReportUseCase {
                 .findById(id)
                 .orElseThrow(() -> new RoomReportNotFoundException(id));
 
+        Instant resolvedAt = resolved
+                ? Instant.now()
+                : null;
+
         RoomReport updated = new RoomReport(
                 existing.id(),
                 existing.room(),
                 existing.reason(),
                 existing.description(),
-                resolved
+                resolvedAt
         );
         return roomReportRepository.save(updated).id();
     }

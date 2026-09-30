@@ -44,7 +44,7 @@ public class RoomReportRepositoryAdapter
             entity.room = report.room();
             entity.reason = report.reason();
             entity.description = report.description();
-            entity.resolved = report.resolved();
+            entity.resolvedAt = report.resolvedAt();
 
             repository.persist(entity);
         } else {
@@ -59,7 +59,7 @@ public class RoomReportRepositoryAdapter
             entity.room = report.room();
             entity.reason = report.reason();
             entity.description = report.description();
-            entity.resolved = report.resolved();
+            entity.resolvedAt = report.resolvedAt();
         }
 
         return toDomain(entity);
@@ -71,7 +71,7 @@ public class RoomReportRepositoryAdapter
                 entity.room,
                 entity.reason,
                 entity.description,
-                entity.resolved
+                entity.resolvedAt
         );
     }
 }
