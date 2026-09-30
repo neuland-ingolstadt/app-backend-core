@@ -8,11 +8,16 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.not;
+import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
@@ -21,14 +26,16 @@ import static org.mockito.Mockito.when;
 @QuarkusTest
 class RoomReportResourceTest {
 
+    private static final Instant RESOLVED_AT = Instant.parse("2026-09-30T10:15:30Z");
+
     @InjectMock
     RoomReportUseCase roomReportUseCase;
 
     @Test
     void shouldReturnList() {
         when(roomReportUseCase.list()).thenReturn(List.of(
-                new RoomReport(1L, "A.101", RoomReportCategory.MISSING, "Beamer fehlt", false),
-                new RoomReport(2L, "B.202", RoomReportCategory.OTHER, "Tür klemmt", true)
+                new RoomReport(1L, "A101", RoomReportCategory.MISSING, "The beamer is not lost, it is in the cloud.", null),
+                new RoomReport(2L, "B202", RoomReportCategory.OTHER, "It works on my machine, but the door is not a machine.", RESOLVED_AT)
         ));
 
         given()
@@ -37,12 +44,13 @@ class RoomReportResourceTest {
                 .statusCode(200)
                 .body("roomReports.size()", is(2))
                 .body("roomReports.[0].id", is(1))
-                .body("roomReports.[0].room", is("A.101"))
+                .body("roomReports.[0].room", is("A101"))
                 .body("roomReports.[0].reason", is("MISSING"))
-                .body("roomReports.[0].description", is("Beamer fehlt"))
-                .body("roomReports.[0].resolved", is(false))
+                .body("roomReports.[0].description", is("The beamer is not lost, it is in the cloud."))
+                .body("roomReports.[0].resolvedAt", nullValue())
                 .body("roomReports.[1].id", is(2))
-                .body("roomReports.[1].resolved", is(true));
+                .body("roomReports.[1].room", is("B202"))
+                .body("roomReports.[1].resolvedAt", is("2026-09-30T10:15:30Z"));
     }
 
     @Test
@@ -64,9 +72,9 @@ class RoomReportResourceTest {
                 .contentType("application/json")
                 .body("""
                         {
-                          "room": "A.101",
+                          "room": "A101",
                           "reason": "MISSING",
-                          "description": "Beamer fehlt"
+                          "description": "The beamer is not lost, it is in the cloud."
                         }
                         """)
                 .when().post("/room-reports")
@@ -76,7 +84,30 @@ class RoomReportResourceTest {
                 .body("id", is(7));
 
         verify(roomReportUseCase).create(
-                new RoomReport(null, "A.101", RoomReportCategory.MISSING, "Beamer fehlt", false)
+                new RoomReport(null, "A101", RoomReportCategory.MISSING, "The beamer is not lost, it is in the cloud.", null)
+        );
+    }
+
+    @Test
+    void shouldCreateWithoutDescription() {
+        when(roomReportUseCase.create(any())).thenReturn(8L);
+
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "room": "A101",
+                          "reason": "MISSING"
+                        }
+                        """)
+                .when().post("/room-reports")
+                .then()
+                .statusCode(201)
+                .header("Location", endsWith("/room-reports/8"))
+                .body("id", is(8));
+
+        verify(roomReportUseCase).create(
+                new RoomReport(null, "A101", RoomReportCategory.MISSING, null, null)
         );
     }
 
@@ -88,14 +119,17 @@ class RoomReportResourceTest {
                         {
                           "room": "  ",
                           "reason": "MISSING",
-                          "description": "Beamer fehlt"
+                          "description": "The beamer is not lost, it is in the cloud."
                         }
                         """)
                 .when().post("/room-reports")
                 .then()
                 .statusCode(400)
+                .contentType("application/problem+json")
+                .body("title", is("Bad Request"))
                 .body("status", is(400))
-                .body("violations[0].message", is("must not be blank"));
+                .body("detail", containsString("room: must not be blank"))
+                .body("instance", endsWith("/room-reports"));
     }
 
     @Test
@@ -104,14 +138,19 @@ class RoomReportResourceTest {
                 .contentType("application/json")
                 .body("""
                         {
-                          "room": "A.101",
+                          "room": "A101",
                           "reason": "NOPE",
-                          "description": "Beamer fehlt"
+                          "description": "The beamer is not lost, it is in the cloud."
                         }
                         """)
                 .when().post("/room-reports")
                 .then()
-                .statusCode(400);
+                .statusCode(400)
+                .contentType("application/problem+json")
+                .body("title", is("Bad Request"))
+                .body("status", is(400))
+                .body("detail", containsString("reason: "))
+                .body("instance", endsWith("/room-reports"));
     }
 
     @Test
@@ -141,7 +180,9 @@ class RoomReportResourceTest {
                 .when().patch("/room-reports/3")
                 .then()
                 .statusCode(400)
-                .body("violations[0].message", is("must not be null"));
+                .contentType("application/problem+json")
+                .body("title", is("Bad Request"))
+                .body("detail", containsString("must not be null"));
     }
 
     @Test
@@ -159,7 +200,40 @@ class RoomReportResourceTest {
                 .when().patch("/room-reports/99")
                 .then()
                 .statusCode(404)
+                .contentType("application/problem+json")
+                .body("$", not(hasKey("type")))
+                .body("title", is("Not Found"))
                 .body("status", is(404))
-                .body("detail", is("Room report not found: 99"));
+                .body("detail", is("Room report not found: 99"))
+                .body("instance", endsWith("/room-reports/99"));
+    }
+
+    @Test
+    void shouldReturnProblemForUnhandledException() {
+        when(roomReportUseCase.list())
+                .thenThrow(new IllegalStateException("database is on fire"));
+
+        given()
+                .when().get("/room-reports")
+                .then()
+                .statusCode(500)
+                .contentType("application/problem+json")
+                .body("title", is("Internal Server Error"))
+                .body("status", is(500))
+                .body("detail", is("Unexpected error"))
+                .body("detail", not(containsString("database is on fire")))
+                .body("instance", endsWith("/room-reports"));
+    }
+
+    @Test
+    void shouldReturnProblemForUnknownRoute() {
+        given()
+                .when().get("/nope")
+                .then()
+                .statusCode(404)
+                .contentType("application/problem+json")
+                .body("title", is("Not Found"))
+                .body("status", is(404))
+                .body("instance", endsWith("/nope"));
     }
 }

@@ -15,7 +15,6 @@ public record CreateRoomReportRequest(
         @NotNull
         RoomReportCategory reason,
 
-        @NotBlank
         @Size(max = 2000)
         String description
 ) {
@@ -26,7 +25,7 @@ public record CreateRoomReportRequest(
                 room,
                 reason,
                 description,
-                false
+                null
         );
     }
 }

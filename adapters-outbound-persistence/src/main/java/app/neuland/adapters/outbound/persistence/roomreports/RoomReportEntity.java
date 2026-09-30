@@ -21,7 +21,7 @@ public class RoomReportEntity extends PanacheEntityBase {
     @Column(nullable = false)
     public RoomReportCategory reason;
 
-    @Column(nullable = false)
+    @Column
     public String description;
 
     @Column(name = "resolved_at")

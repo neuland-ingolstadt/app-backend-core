@@ -3,44 +3,27 @@ package app.neuland.adapters.inbound.rest.error;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.ws.rs.core.Response;
-import jakarta.ws.rs.ext.ExceptionMapper;
 import jakarta.ws.rs.ext.Provider;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Provider
 public class ConstraintViolationExceptionMapper
-        implements ExceptionMapper<ConstraintViolationException> {
+        extends AbstractProblemExceptionMapper<ConstraintViolationException> {
 
     @Override
-    public Response toResponse(ConstraintViolationException exception) {
-        List<FieldViolation> violations = exception.getConstraintViolations()
-                .stream()
-                .map(this::toFieldViolation)
-                .toList();
-
-        String detail = violations
-                .stream()
-                .map(FieldViolation::toDetail)
-                .collect(Collectors.joining(", "));
-
-        return Response
-                .status(Response.Status.BAD_REQUEST)
-                .entity(
-                        new ErrorResponse(
-                                Response.Status.BAD_REQUEST.getStatusCode(),
-                                detail,
-                                violations
-                        )
-                )
-                .build();
+    protected Problem problem(ConstraintViolationException exception) {
+        return problem(Response.Status.BAD_REQUEST, detail(exception));
     }
 
-    private FieldViolation toFieldViolation(ConstraintViolation<?> violation) {
-        return new FieldViolation(
-                violation.getPropertyPath().toString(),
-                violation.getMessage()
-        );
+    private String detail(ConstraintViolationException exception) {
+        return exception.getConstraintViolations()
+                .stream()
+                .map(this::toDetail)
+                .collect(Collectors.joining(", "));
+    }
+
+    private String toDetail(ConstraintViolation<?> violation) {
+        return violation.getPropertyPath() + ": " + violation.getMessage();
     }
 }
