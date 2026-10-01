@@ -6,6 +6,7 @@ on:
 
 permissions:
   contents: read
+  packages: read
   pull-requests: read
 
 jobs:
@@ -25,6 +26,9 @@ jobs:
           java-version: '25'
           distribution: 'temurin'
           cache: maven
+          server-id: github-neuland-contracts
+          server-username: GITHUB_ACTOR
+          server-password: GITHUB_TOKEN
 
       - name: Cache SonarQube packages
         uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
@@ -35,6 +39,7 @@ jobs:
 
       - name: Run tests and SonarCloud analysis
         env:
+          GITHUB_ACTOR: ${{ github.actor }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar

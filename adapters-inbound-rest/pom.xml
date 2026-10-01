@@ -17,6 +17,10 @@
             <artifactId>application</artifactId>
         </dependency>
         <dependency>
+            <groupId>app.neuland</groupId>
+            <artifactId>backend-core-api-v0</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-rest</artifactId>
         </dependency>

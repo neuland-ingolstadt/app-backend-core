@@ -1,5 +1,6 @@
 package app.neuland.adapters.inbound.rest.error;
 
+import com.fasterxml.jackson.databind.exc.InvalidFormatException;
 import com.fasterxml.jackson.databind.exc.MismatchedInputException;
 import jakarta.annotation.Priority;
 import jakarta.ws.rs.Priorities;
@@ -21,10 +22,29 @@ public class MismatchedInputExceptionMapper
                 ? exception.getOriginalMessage()
                 : exception.getMessage();
 
-        return exception.getPath()
+        String field = exception.getPath()
                 .stream()
+                .map(reference -> reference.getFieldName())
+                .filter(name -> name != null && !name.isBlank())
                 .findFirst()
-                .map(reference -> reference.getFieldName() + ": " + message)
-                .orElse(message);
+                .orElse(null);
+
+        if (field == null && exception instanceof InvalidFormatException invalidFormat) {
+            field = invalidFormat.getPath()
+                    .stream()
+                    .map(reference -> reference.getFieldName())
+                    .filter(name -> name != null && !name.isBlank())
+                    .findFirst()
+                    .orElse("value");
+            if (message == null || message.isBlank()) {
+                message = "Invalid value: " + invalidFormat.getValue();
+            }
+        }
+
+        if (field == null) {
+            return message;
+        }
+
+        return field + ": " + message;
     }
 }

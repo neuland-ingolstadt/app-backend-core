@@ -13,7 +13,7 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 ## Related repos
 
-- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs
+- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs (`app.neuland:backend-core-api-v0`)
 - [app-backend-food](https://github.com/neuland-ingolstadt/app-backend-food) — food data (called by Public API)
 - [app-backend-cloud-gateway](https://github.com/neuland-ingolstadt/app-backend-cloud-gateway) — external entry point
 - [neuland.app-backend](https://github.com/neuland-ingolstadt/neuland.app-backend) — legacy GraphQL backend (to be retired)
@@ -22,12 +22,15 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 This is a multi-module Maven (hexagonal architecture) project:
 
-- `adapters-inbound-rest` — JAX-RS REST resources
+- `adapters-inbound-rest` — JAX-RS resources implementing generated contract APIs
 - `adapters-outbound-persistence` — persistence adapter
 - `application` — inbound/outbound ports and use cases
 - `bootstrap` — Quarkus application wiring all modules together
 - `domain` — framework-free core entities/value objects
 
+Local builds need access to GitHub Packages for `backend-core-api-v0`. Configure
+`~/.m2/settings.xml` with a `github-neuland-contracts` server (GitHub username +
+PAT/`gh` token with `read:packages`), matching the repository id in the root POM.
 ## Build & Run
 
 The Maven Wrapper lives at the repo root and always builds the full reactor. Run all commands from here, not from inside a module folder.
