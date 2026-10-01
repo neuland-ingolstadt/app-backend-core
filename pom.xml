@@ -23,6 +23,10 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
+        <sonar.organization>neuland-ingolstadt</sonar.organization>
+        <sonar.projectKey>neuland-ingolstadt_app-backend-core</sonar.projectKey>
+        <sonar.host.url>https://sonarcloud.io</sonar.host.url>
+        <sonar.coverage.jacoco.aggregateXmlReportPaths>${maven.multiModuleProjectDirectory}/target/coverage/jacoco.xml</sonar.coverage.jacoco.aggregateXmlReportPaths>
     </properties>
 
     <dependencyManagement>
