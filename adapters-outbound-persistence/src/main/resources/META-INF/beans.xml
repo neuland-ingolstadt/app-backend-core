@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Marks this module as an explicit CDI bean archive so Quarkus discovers the
+  @Entity, @ApplicationScoped repository and adapter classes in it. Without
+  this marker the module is treated as a plain dependency jar and its beans
+  are never scanned.
+-->
+<beans xmlns="https://jakarta.ee/xml/ns/jakartaee"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee
+                           https://jakarta.ee/xml/ns/jakartaee/beans_4_0.xsd"
+>
+</beans>

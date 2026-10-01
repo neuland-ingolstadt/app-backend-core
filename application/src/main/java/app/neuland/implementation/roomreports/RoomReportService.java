@@ -1,4 +1,4 @@
-package app.neuland.implementation;
+package app.neuland.implementation.roomreports;
 
 import app.neuland.model.roomreport.RoomReport;
 import app.neuland.ports.inbound.RoomReportUseCase;
