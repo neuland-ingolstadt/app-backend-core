@@ -6,7 +6,6 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 env:
   BASE_IMAGE_NAME: ghcr.io/neuland-ingolstadt/app-backend-core
@@ -49,6 +48,9 @@ jobs:
     name: Build and publish
     needs: test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
