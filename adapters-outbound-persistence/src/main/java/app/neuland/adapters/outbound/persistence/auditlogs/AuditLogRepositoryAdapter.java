@@ -9,6 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+import java.util.Objects;
 
 @ApplicationScoped
 public class AuditLogRepositoryAdapter implements AuditLogRepository {
@@ -22,6 +23,7 @@ public class AuditLogRepositoryAdapter implements AuditLogRepository {
 
     @Override
     public AuditLogPage findAll(Long limit, String cursor) {
+        Objects.requireNonNull(limit, "limit must not be null");
         Instant afterOccurredAt = null;
         Long afterId = null;
 
@@ -72,13 +74,15 @@ public class AuditLogRepositoryAdapter implements AuditLogRepository {
                     Base64.getUrlDecoder().decode(cursor),
                     StandardCharsets.UTF_8
             );
+            int separatorIndex = raw.indexOf(':');
 
-            String[] parts = raw.split(":", 2);
+            if (separatorIndex < 0) {
+                throw new IllegalArgumentException("Invalid cursor: " + cursor);
+            }
 
-            return new CursorPosition(
-                    Instant.ofEpochMilli(Long.parseLong(parts[0])),
-                    Long.parseLong(parts[1])
-            );
+            long epochMilli = Long.parseLong(raw.substring(0, separatorIndex));
+            long id = Long.parseLong(raw.substring(separatorIndex + 1));
+            return new CursorPosition(Instant.ofEpochMilli(epochMilli), id);
         } catch (RuntimeException e) {
             throw new IllegalArgumentException("Invalid cursor: " + cursor, e);
         }
