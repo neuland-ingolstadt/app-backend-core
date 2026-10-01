@@ -23,10 +23,12 @@
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
         <sonar.projectKey>neuland-ingolstadt_app-backend-core</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.aggregateXmlReportPaths>${maven.multiModuleProjectDirectory}/target/coverage/jacoco.xml</sonar.coverage.jacoco.aggregateXmlReportPaths>
+        <jacoco.destFile>${maven.multiModuleProjectDirectory}/target/jacoco.exec</jacoco.destFile>
     </properties>
 
     <dependencyManagement>
@@ -98,6 +100,23 @@
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <destFile>${jacoco.destFile}</destFile>
+                                <append>true</append>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>
