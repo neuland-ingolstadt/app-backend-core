@@ -4,6 +4,8 @@ import app.neuland.model.roomreport.RoomReportCategory;
 import io.quarkus.hibernate.orm.panache.PanacheEntityBase;
 import jakarta.persistence.*;
 
+import java.time.Instant;
+
 @Entity
 @Table(name = "room_reports")
 public class RoomReportEntity extends PanacheEntityBase {
@@ -22,6 +24,6 @@ public class RoomReportEntity extends PanacheEntityBase {
     @Column(nullable = false)
     public String description;
 
-    @Column(nullable = false)
-    public boolean resolved;
+    @Column(name = "resolved_at")
+    public Instant resolvedAt;
 }
