@@ -24,7 +24,7 @@
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
         <backend-core-api.version>1.0.1</backend-core-api.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
-        <jacoco.version>0.8.13</jacoco.version>
+        <jacoco.version>0.8.15</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
         <sonar.projectKey>neuland-ingolstadt_app-backend-core</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
