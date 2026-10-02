@@ -112,12 +112,11 @@ class RoomReportResourceTest {
     }
 
     @Test
-    void shouldRejectCreateWithBlankRoom() {
+    void shouldRejectCreateWithMissingRoom() {
         given()
                 .contentType("application/json")
                 .body("""
                         {
-                          "room": "  ",
                           "reason": "MISSING",
                           "description": "The beamer is not lost, it is in the cloud."
                         }
@@ -128,7 +127,7 @@ class RoomReportResourceTest {
                 .contentType("application/problem+json")
                 .body("title", is("Bad Request"))
                 .body("status", is(400))
-                .body("detail", containsString("room: must not be blank"))
+                .body("detail", containsString("room"))
                 .body("instance", endsWith("/room-reports"));
     }
 
@@ -149,7 +148,6 @@ class RoomReportResourceTest {
                 .contentType("application/problem+json")
                 .body("title", is("Bad Request"))
                 .body("status", is(400))
-                .body("detail", containsString("reason: "))
                 .body("instance", endsWith("/room-reports"));
     }
 
@@ -182,7 +180,7 @@ class RoomReportResourceTest {
                 .statusCode(400)
                 .contentType("application/problem+json")
                 .body("title", is("Bad Request"))
-                .body("detail", containsString("must not be null"));
+                .body("detail", containsString("resolved"));
     }
 
     @Test

@@ -13,7 +13,7 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 ## Related repos
 
-- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs
+- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs (`app.neuland:backend-core-api-v0`)
 - [app-backend-food](https://github.com/neuland-ingolstadt/app-backend-food) — food data (called by Public API)
 - [app-backend-cloud-gateway](https://github.com/neuland-ingolstadt/app-backend-cloud-gateway) — external entry point
 - [neuland.app-backend](https://github.com/neuland-ingolstadt/neuland.app-backend) — legacy GraphQL backend (to be retired)
@@ -22,11 +22,38 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 This is a multi-module Maven (hexagonal architecture) project:
 
-- `adapters-inbound-rest` — JAX-RS REST resources
+- `adapters-inbound-rest` — JAX-RS resources implementing generated contract APIs
 - `adapters-outbound-persistence` — persistence adapter
 - `application` — inbound/outbound ports and use cases
 - `bootstrap` — Quarkus application wiring all modules together
 - `domain` — framework-free core entities/value objects
+
+Local builds need access to GitHub Packages for `backend-core-api-v0`
+(`read:packages`). The server id must be `github-neuland-contracts` (see root POM).
+
+<details>
+<summary><code>~/.m2/settings.xml</code> template</summary>
+
+```bash
+gh auth refresh -h github.com -s read:packages
+```
+
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>github-neuland-contracts</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+```
+
+Use your GitHub username and the token from `gh auth token` (or a classic PAT with
+`read:packages`) as the password.
+
+</details>
 
 ## Build & Run
 

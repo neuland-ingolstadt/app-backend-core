@@ -16,12 +16,14 @@
 
     <properties>
         <compiler-plugin.version>3.16.0</compiler-plugin.version>
+        <jar-plugin.version>3.5.1</jar-plugin.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
+        <backend-core-api.version>1.0.1</backend-core-api.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
@@ -72,8 +74,23 @@
                 <artifactId>bootstrap</artifactId>
                 <version>${project.version}</version>
             </dependency>
+            <dependency>
+                <groupId>app.neuland</groupId>
+                <artifactId>backend-core-api-v0</artifactId>
+                <version>${backend-core-api.version}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
+
+    <repositories>
+        <repository>
+            <id>github-neuland-contracts</id>
+            <url>https://maven.pkg.github.com/neuland-ingolstadt/app-backend-contracts</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+        </repository>
+    </repositories>
 
     <dependencies>
         <dependency>
@@ -117,6 +134,10 @@
                     <configuration>
                         <parameters>true</parameters>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${jar-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
