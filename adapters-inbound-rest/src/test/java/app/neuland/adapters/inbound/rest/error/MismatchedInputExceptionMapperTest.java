@@ -121,14 +121,16 @@ class MismatchedInputExceptionMapperTest {
     @Test
     void shouldPreferNamedFieldFromInvalidFormatPathInsideFallback() {
         InvalidFormatException exception = mock(InvalidFormatException.class);
+        JsonMappingException.Reference nullName = mock(JsonMappingException.Reference.class);
         JsonMappingException.Reference blankName = mock(JsonMappingException.Reference.class);
         JsonMappingException.Reference named = mock(JsonMappingException.Reference.class);
         when(exception.getOriginalMessage()).thenReturn("not a valid enum");
         // First path lookup finds nothing (enter InvalidFormat fallback);
-        // second lookup (on the same exception) skips blanks then yields a field.
+        // second lookup (on the same exception) skips null/blank then yields a field.
         when(exception.getPath())
                 .thenReturn(List.of())
-                .thenReturn(List.of(blankName, named));
+                .thenReturn(List.of(nullName, blankName, named));
+        when(nullName.getFieldName()).thenReturn(null);
         when(blankName.getFieldName()).thenReturn("  ");
         when(named.getFieldName()).thenReturn("reason");
 
