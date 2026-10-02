@@ -11,9 +11,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.nio.charset.StandardCharsets;
-import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
+
+import static app.neuland.model.auditlog.AuditLogFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -76,17 +77,5 @@ class AuditLogServiceTest {
         when(auditLogRepository.save(entry)).thenReturn(saved);
 
         assertEquals(saved, service.append(entry));
-    }
-
-    private static AuditLogEntry sample(Long id, AuditLogOperation operation) {
-        return new AuditLogEntry(
-                id,
-                "Announcement",
-                42L,
-                operation,
-                "title",
-                "user-1",
-                Instant.parse("2026-01-01T12:00:00Z")
-        );
     }
 }

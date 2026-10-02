@@ -13,11 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static app.neuland.model.announcement.AnnouncementFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -134,19 +135,5 @@ class AnnouncementServiceTest {
         when(announcementRepository.findById(anyLong())).thenReturn(Optional.empty());
 
         assertThrows(AnnouncementNotFoundException.class, () -> service.delete(99L));
-    }
-
-    private static Announcement sample(Long id) {
-        return new Announcement(
-                id,
-                EnumSet.of(Platform.ANDROID, Platform.IOS),
-                EnumSet.of(UserKind.STUDENT, UserKind.GUEST),
-                Map.of(Language.DE, new AnnouncementContent("Titel", "Beschreibung")),
-                Instant.parse("2026-01-01T00:00:00Z"),
-                Instant.parse("2026-12-31T23:59:59Z"),
-                1,
-                null,
-                null
-        );
     }
 }

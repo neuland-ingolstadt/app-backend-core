@@ -14,6 +14,8 @@ import java.time.Instant;
 import java.util.Base64;
 import java.util.List;
 
+import static app.neuland.adapters.outbound.persistence.auditlogs.AuditLogEntityFixtures.entity;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -121,17 +123,5 @@ class AuditLogRepositoryAdapterTest {
         assertEquals(50L, saved.id());
         assertEquals(AuditLogOperation.CREATE, saved.operation());
         verify(repository).persist(any(AuditLogEntity.class));
-    }
-
-    private static AuditLogEntity entity(Long id, Instant occurredAt) {
-        AuditLogEntity entity = new AuditLogEntity();
-        entity.id = id;
-        entity.entity = "Announcement";
-        entity.entityId = id;
-        entity.operation = AuditLogOperation.UPDATE;
-        entity.name = "name-" + id;
-        entity.userId = "user-" + id;
-        entity.occurredAt = occurredAt;
-        return entity;
     }
 }

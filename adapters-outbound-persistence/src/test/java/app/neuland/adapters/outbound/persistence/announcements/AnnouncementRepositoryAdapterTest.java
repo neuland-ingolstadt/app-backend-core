@@ -13,13 +13,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.EnumSet;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+
+import static app.neuland.adapters.outbound.persistence.announcements.AnnouncementEntityFixtures.entity;
+import static app.neuland.model.announcement.AnnouncementFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -83,7 +83,7 @@ class AnnouncementRepositoryAdapterTest {
             return null;
         }).when(repository).persist(any(AnnouncementEntity.class));
 
-        Announcement saved = adapter.save(domain(null));
+        Announcement saved = adapter.save(sample(null));
 
         assertEquals(10L, saved.id());
         assertEquals(Set.of(Platform.ANDROID, Platform.IOS), saved.platforms());
@@ -117,7 +117,7 @@ class AnnouncementRepositoryAdapterTest {
     void shouldThrowWhenUpdatingMissingAnnouncement() {
         when(repository.findById(99L)).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> adapter.save(domain(99L)));
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(sample(99L)));
     }
 
     @Test
@@ -135,35 +135,5 @@ class AnnouncementRepositoryAdapterTest {
         when(repository.findById(99L)).thenReturn(null);
 
         assertThrows(IllegalArgumentException.class, () -> adapter.deleteById(99L));
-    }
-
-    private static Announcement domain(Long id) {
-        return new Announcement(
-                id,
-                EnumSet.of(Platform.ANDROID, Platform.IOS),
-                EnumSet.of(UserKind.STUDENT, UserKind.GUEST),
-                Map.of(Language.DE, new AnnouncementContent("Titel", "Beschreibung")),
-                Instant.parse("2026-01-01T00:00:00Z"),
-                Instant.parse("2026-12-31T23:59:59Z"),
-                1,
-                null,
-                null
-        );
-    }
-
-    private static AnnouncementEntity entity(Long id) {
-        AnnouncementEntity entity = new AnnouncementEntity();
-        entity.id = id;
-        entity.platforms = new HashSet<>(EnumSet.of(Platform.ANDROID, Platform.IOS));
-        entity.userKinds = new HashSet<>(EnumSet.of(UserKind.STUDENT, UserKind.GUEST));
-        AnnouncementContentEmbeddable content = new AnnouncementContentEmbeddable();
-        content.title = "Titel";
-        content.description = "Beschreibung";
-        entity.contents = new HashMap<>();
-        entity.contents.put(Language.DE, content);
-        entity.startDateTime = Instant.parse("2026-01-01T00:00:00Z");
-        entity.endDateTime = Instant.parse("2026-12-31T23:59:59Z");
-        entity.priority = 1;
-        return entity;
     }
 }

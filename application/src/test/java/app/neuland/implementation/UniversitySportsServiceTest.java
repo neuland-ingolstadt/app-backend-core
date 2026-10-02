@@ -1,10 +1,8 @@
 package app.neuland.implementation;
 
-import app.neuland.model.shared.Language;
 import app.neuland.model.universitysports.Campus;
 import app.neuland.model.universitysports.Sports;
 import app.neuland.model.universitysports.SportsCategory;
-import app.neuland.model.universitysports.SportsContent;
 import app.neuland.model.universitysports.Weekday;
 import app.neuland.ports.outbound.UniversitySportsRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,8 +13,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+
+import static app.neuland.model.universitysports.SportsFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -139,24 +138,5 @@ class UniversitySportsServiceTest {
         );
 
         assertNull(sport.contents());
-    }
-
-    private static Sports sample(Long id, Weekday weekday, SportsCategory category) {
-        return new Sports(
-                id,
-                Map.of(
-                        Language.DE, new SportsContent("Titel", "Beschreibung"),
-                        Language.EN, new SportsContent("Title", "Description")
-                ),
-                Campus.INGOLSTADT,
-                "Sporthalle",
-                weekday,
-                LocalTime.of(17, 0),
-                LocalTime.of(18, 30),
-                true,
-                "https://invite.example",
-                "sports@example.com",
-                category
-        );
     }
 }

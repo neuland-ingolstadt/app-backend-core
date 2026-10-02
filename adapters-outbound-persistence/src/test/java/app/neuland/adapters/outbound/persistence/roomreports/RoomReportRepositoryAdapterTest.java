@@ -13,6 +13,8 @@ import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
 
+import static app.neuland.adapters.outbound.persistence.roomreports.RoomReportEntityFixtures.entity;
+
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -105,21 +107,5 @@ class RoomReportRepositoryAdapterTest {
         assertThrows(IllegalArgumentException.class, () -> adapter.save(
                 new RoomReport(99L, "A101", RoomReportCategory.MISSING, null, null)
         ));
-    }
-
-    private static RoomReportEntity entity(
-            Long id,
-            String room,
-            RoomReportCategory reason,
-            String description,
-            Instant resolvedAt
-    ) {
-        RoomReportEntity entity = new RoomReportEntity();
-        entity.id = id;
-        entity.room = room;
-        entity.reason = reason;
-        entity.description = description;
-        entity.resolvedAt = resolvedAt;
-        return entity;
     }
 }

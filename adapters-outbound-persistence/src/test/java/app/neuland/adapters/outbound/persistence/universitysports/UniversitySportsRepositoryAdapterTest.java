@@ -13,10 +13,12 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import static app.neuland.adapters.outbound.persistence.universitysports.UniversitySportsEntityFixtures.entity;
+import static app.neuland.model.universitysports.SportsFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -65,7 +67,7 @@ class UniversitySportsRepositoryAdapterTest {
             return null;
         }).when(repository).persist(any(UniversitySportsEntity.class));
 
-        Sports saved = adapter.save(domain(null));
+        Sports saved = adapter.save(sample(null));
 
         assertEquals(20L, saved.id());
         verify(repository).persist(any(UniversitySportsEntity.class));
@@ -103,7 +105,7 @@ class UniversitySportsRepositoryAdapterTest {
     void shouldThrowWhenUpdatingMissingSport() {
         when(repository.findById(99L)).thenReturn(null);
 
-        assertThrows(IllegalArgumentException.class, () -> adapter.save(domain(99L)));
+        assertThrows(IllegalArgumentException.class, () -> adapter.save(sample(99L)));
     }
 
     @Test
@@ -168,48 +170,5 @@ class UniversitySportsRepositoryAdapterTest {
         adapter.deleteById(8L);
 
         verify(repository).deleteById(8L);
-    }
-
-    private static Sports domain(Long id) {
-        return new Sports(
-                id,
-                Map.of(
-                        Language.DE, new SportsContent("Titel", "Beschreibung"),
-                        Language.EN, new SportsContent("Title", "Description")
-                ),
-                Campus.INGOLSTADT,
-                "Sporthalle",
-                Weekday.MONDAY,
-                LocalTime.of(17, 0),
-                LocalTime.of(18, 30),
-                true,
-                "https://invite.example",
-                "sports@example.com",
-                SportsCategory.CALISTHENICS
-        );
-    }
-
-    private static UniversitySportsEntity entity(Long id) {
-        UniversitySportsEntity entity = new UniversitySportsEntity();
-        entity.id = id;
-        UniversitySportsContentEmbeddable de = new UniversitySportsContentEmbeddable();
-        de.title = "Titel";
-        de.description = "Beschreibung";
-        UniversitySportsContentEmbeddable en = new UniversitySportsContentEmbeddable();
-        en.title = "Title";
-        en.description = "Description";
-        entity.contents = new HashMap<>();
-        entity.contents.put(Language.DE, de);
-        entity.contents.put(Language.EN, en);
-        entity.campus = Campus.INGOLSTADT;
-        entity.location = "Sporthalle";
-        entity.weekday = Weekday.MONDAY;
-        entity.startTime = LocalTime.of(17, 0);
-        entity.endTime = LocalTime.of(18, 30);
-        entity.requiresRegistration = true;
-        entity.invitationLink = "https://invite.example";
-        entity.email = "sports@example.com";
-        entity.sportsCategory = SportsCategory.CALISTHENICS;
-        return entity;
     }
 }
