@@ -16,6 +16,7 @@
 
     <properties>
         <compiler-plugin.version>3.16.0</compiler-plugin.version>
+        <jar-plugin.version>3.5.1</jar-plugin.version>
         <maven.compiler.release>25</maven.compiler.release>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
@@ -133,6 +134,10 @@
                     <configuration>
                         <parameters>true</parameters>
                     </configuration>
+                </plugin>
+                <plugin>
+                    <artifactId>maven-jar-plugin</artifactId>
+                    <version>${jar-plugin.version}</version>
                 </plugin>
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
