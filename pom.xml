@@ -24,10 +24,12 @@
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
         <backend-core-api.version>1.0.1</backend-core-api.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
+        <jacoco.version>0.8.13</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
         <sonar.projectKey>neuland-ingolstadt_app-backend-core</sonar.projectKey>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
         <sonar.coverage.jacoco.aggregateXmlReportPaths>${maven.multiModuleProjectDirectory}/target/coverage/jacoco.xml</sonar.coverage.jacoco.aggregateXmlReportPaths>
+        <jacoco.destFile>${maven.multiModuleProjectDirectory}/target/jacoco.exec</jacoco.destFile>
     </properties>
 
     <dependencyManagement>
@@ -43,6 +45,13 @@
                 <groupId>app.neuland</groupId>
                 <artifactId>domain</artifactId>
                 <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>app.neuland</groupId>
+                <artifactId>domain</artifactId>
+                <version>${project.version}</version>
+                <type>test-jar</type>
+                <scope>test</scope>
             </dependency>
             <dependency>
                 <groupId>app.neuland</groupId>
@@ -82,6 +91,24 @@
         </repository>
     </repositories>
 
+    <dependencies>
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-junit-jupiter</artifactId>
+            <scope>test</scope>
+        </dependency>
+    </dependencies>
+
     <build>
         <pluginManagement>
             <plugins>
@@ -110,10 +137,33 @@
                 <plugin>
                     <artifactId>maven-surefire-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
+                    <configuration>
+                        <argLine>@{argLine}</argLine>
+                    </configuration>
                 </plugin>
                 <plugin>
                     <artifactId>maven-failsafe-plugin</artifactId>
                     <version>${surefire-plugin.version}</version>
+                    <configuration>
+                        <argLine>@{argLine}</argLine>
+                    </configuration>
+                </plugin>
+                <plugin>
+                    <groupId>org.jacoco</groupId>
+                    <artifactId>jacoco-maven-plugin</artifactId>
+                    <version>${jacoco.version}</version>
+                    <executions>
+                        <execution>
+                            <id>prepare-agent</id>
+                            <goals>
+                                <goal>prepare-agent</goal>
+                            </goals>
+                            <configuration>
+                                <destFile>${jacoco.destFile}</destFile>
+                                <append>true</append>
+                            </configuration>
+                        </execution>
+                    </executions>
                 </plugin>
             </plugins>
         </pluginManagement>

@@ -16,6 +16,24 @@
             <groupId>app.neuland</groupId>
             <artifactId>domain</artifactId>
         </dependency>
+        <dependency>
+            <groupId>app.neuland</groupId>
+            <artifactId>domain</artifactId>
+            <type>test-jar</type>
+            <scope>test</scope>
+        </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+            </plugin>
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>
