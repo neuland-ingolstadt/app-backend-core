@@ -28,9 +28,33 @@ This is a multi-module Maven (hexagonal architecture) project:
 - `bootstrap` — Quarkus application wiring all modules together
 - `domain` — framework-free core entities/value objects
 
-Local builds need access to GitHub Packages for `backend-core-api-v0`. Configure
-`~/.m2/settings.xml` with a `github-neuland-contracts` server (GitHub username +
-PAT/`gh` token with `read:packages`), matching the repository id in the root POM.
+Local builds need access to GitHub Packages for `backend-core-api-v0`
+(`read:packages`). The server id must be `github-neuland-contracts` (see root POM).
+
+<details>
+<summary><code>~/.m2/settings.xml</code> template</summary>
+
+```bash
+gh auth refresh -h github.com -s read:packages
+```
+
+```xml
+<settings>
+  <servers>
+    <server>
+      <id>github-neuland-contracts</id>
+      <username>YOUR_GITHUB_USERNAME</username>
+      <password>YOUR_TOKEN</password>
+    </server>
+  </servers>
+</settings>
+```
+
+Use your GitHub username and the token from `gh auth token` (or a classic PAT with
+`read:packages`) as the password.
+
+</details>
+
 ## Build & Run
 
 The Maven Wrapper lives at the repo root and always builds the full reactor. Run all commands from here, not from inside a module folder.
