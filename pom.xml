@@ -23,7 +23,7 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.39.5</quarkus.platform.version>
-        <backend-core-api.version>1.0.1</backend-core-api.version>
+        <backend-core-api.version>1.0.2</backend-core-api.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
