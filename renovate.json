@@ -6,5 +6,13 @@
   "platformAutomerge": false,
   "automergeType": "pr",
   "automergeStrategy": "squash",
-  "automerge": true
+  "automerge": true,
+  "packageRules": [
+    {
+      "description": "Ship backend contract updates immediately (no release-age or schedule delay)",
+      "matchPackageNames": ["app.neuland:backend-core-api-**"],
+      "minimumReleaseAge": null,
+      "schedule": ["at any time"]
+    }
+  ]
 }
