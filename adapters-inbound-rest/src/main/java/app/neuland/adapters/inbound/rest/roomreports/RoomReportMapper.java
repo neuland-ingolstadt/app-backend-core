@@ -10,10 +10,7 @@ import app.neuland.model.roomreport.RoomReportCategory;
 import java.time.ZoneOffset;
 import java.util.List;
 
-final class RoomReportMapper {
-
-    private RoomReportMapper() {
-    }
+record RoomReportMapper() {
 
     static RoomReport toDomain(CreateRoomReportRequest request) {
         return new RoomReport(
