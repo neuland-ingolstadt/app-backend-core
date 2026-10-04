@@ -4,15 +4,11 @@ import app.neuland.backend.core.api.v0.RoomReportsApi;
 import app.neuland.backend.core.api.v0.model.CreateRoomReportRequest;
 import app.neuland.backend.core.api.v0.model.RoomReportPatchRequest;
 import app.neuland.ports.inbound.RoomReportUseCase;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Path;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 
-@Path("/room-reports")
-@ApplicationScoped
 public class RoomReportResource implements RoomReportsApi {
 
     private final RoomReportUseCase roomReportUseCase;
