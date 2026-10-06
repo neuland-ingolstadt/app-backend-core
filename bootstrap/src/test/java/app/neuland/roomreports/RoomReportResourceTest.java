@@ -4,6 +4,7 @@ import app.neuland.implementation.roomreports.RoomReportNotFoundException;
 import app.neuland.model.roomreport.RoomReport;
 import app.neuland.model.roomreport.RoomReportCategory;
 import app.neuland.ports.inbound.RoomReportUseCase;
+import app.neuland.security.JwtTestFixture;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -39,6 +40,8 @@ class RoomReportResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .when().get("/room-reports")
                 .then()
                 .statusCode(200)
@@ -58,6 +61,8 @@ class RoomReportResourceTest {
         when(roomReportUseCase.list()).thenReturn(List.of());
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .when().get("/room-reports")
                 .then()
                 .statusCode(200)
@@ -156,6 +161,8 @@ class RoomReportResourceTest {
         when(roomReportUseCase.resolve(anyLong(), any(Boolean.class))).thenReturn(3L);
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -173,6 +180,8 @@ class RoomReportResourceTest {
     @Test
     void shouldRejectResolveWithoutResolvedFlag() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .contentType("application/json")
                 .body("{}")
                 .when().patch("/room-reports/3")
@@ -189,6 +198,8 @@ class RoomReportResourceTest {
                 .thenThrow(new RoomReportNotFoundException(99L));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -212,6 +223,8 @@ class RoomReportResourceTest {
                 .thenThrow(new IllegalStateException("database is on fire"));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
                 .when().get("/room-reports")
                 .then()
                 .statusCode(500)
@@ -233,5 +246,62 @@ class RoomReportResourceTest {
                 .body("title", is("Not Found"))
                 .body("status", is(404))
                 .body("instance", endsWith("/nope"));
+    }
+
+    @Test
+    void shouldRejectListWithoutAuthentication() {
+        given()
+                .when()
+                .get("/room-reports")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectListWithInvalidToken() {
+        given()
+                .auth()
+                .oauth2("invalid-token")
+                .when()
+                .get("/room-reports")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectListWithWrongGroup() {
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.wrongGroupToken())
+                .when()
+                .get("/room-reports")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void shouldAllowListForReportsRole() {
+        when(roomReportUseCase.list()).thenReturn(List.of());
+
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
+                .when()
+                .get("/room-reports")
+                .then()
+                .statusCode(200);
+    }
+
+    @Test
+    void shouldAllowListForAdminRole() {
+        when(roomReportUseCase.list()).thenReturn(List.of());
+
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
+                .when()
+                .get("/room-reports")
+                .then()
+                .statusCode(200);
     }
 }
