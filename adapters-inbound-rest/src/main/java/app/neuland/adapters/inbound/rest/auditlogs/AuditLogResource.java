@@ -9,7 +9,7 @@ import jakarta.ws.rs.Path;
 
 @Path("/audit-logs")
 @ApplicationScoped
-public class AuditLogResource implements AuditLogsApi{
+public class AuditLogResource implements AuditLogsApi {
 
     private final AuditLogUseCase auditLogUseCase;
 
