@@ -3,12 +3,8 @@ package app.neuland.adapters.inbound.rest.auditlogs;
 import app.neuland.backend.core.api.v0.AuditLogsApi;
 import app.neuland.ports.inbound.AuditLogUseCase;
 import jakarta.ws.rs.core.Response;
-import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.inject.Inject;
-import jakarta.ws.rs.Path;
 
-@Path("/audit-logs")
-@ApplicationScoped
 public class AuditLogResource implements AuditLogsApi {
 
     private final AuditLogUseCase auditLogUseCase;

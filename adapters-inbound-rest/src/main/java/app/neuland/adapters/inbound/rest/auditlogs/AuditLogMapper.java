@@ -11,10 +11,7 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 
-final class AuditLogMapper {
-    
-    private AuditLogMapper() {
-    }
+record AuditLogMapper() {
 
     static AuditLogListResponse mapToAuditLogListResponse(AuditLogPage auditLogPage) {
         AuditLogListResponse auditLogListResponse = new AuditLogListResponse(
