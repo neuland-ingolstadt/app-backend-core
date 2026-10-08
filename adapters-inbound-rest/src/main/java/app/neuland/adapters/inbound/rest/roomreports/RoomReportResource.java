@@ -1,9 +1,12 @@
 package app.neuland.adapters.inbound.rest.roomreports;
 
+import app.neuland.adapters.inbound.security.SecurityRoles;
 import app.neuland.backend.core.api.v0.RoomReportsApi;
 import app.neuland.backend.core.api.v0.model.CreateRoomReportRequest;
 import app.neuland.backend.core.api.v0.model.RoomReportPatchRequest;
 import app.neuland.ports.inbound.RoomReportUseCase;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -22,6 +25,10 @@ public class RoomReportResource implements RoomReportsApi {
     }
 
     @Override
+    @RolesAllowed({
+            SecurityRoles.reportsRole,
+            SecurityRoles.adminRole
+    })
     public Response listRoomReports() {
         return Response
                 .ok(RoomReportMapper.toListResponse(roomReportUseCase.list()))
@@ -29,6 +36,7 @@ public class RoomReportResource implements RoomReportsApi {
     }
 
     @Override
+    @PermitAll
     public Response createRoomReport(CreateRoomReportRequest createRoomReportRequest) {
         Long id = roomReportUseCase.create(RoomReportMapper.toDomain(createRoomReportRequest));
 
@@ -43,6 +51,10 @@ public class RoomReportResource implements RoomReportsApi {
     }
 
     @Override
+    @RolesAllowed({
+            SecurityRoles.reportsRole,
+            SecurityRoles.adminRole
+    })
     public Response resolveRoomReport(
             Long roomReportId,
             RoomReportPatchRequest roomReportPatchRequest
