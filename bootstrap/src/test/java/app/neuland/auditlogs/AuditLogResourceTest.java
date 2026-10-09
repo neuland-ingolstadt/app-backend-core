@@ -4,6 +4,7 @@ import app.neuland.model.auditlog.AuditLogEntry;
 import app.neuland.model.auditlog.AuditLogOperation;
 import app.neuland.model.auditlog.AuditLogPage;
 import app.neuland.ports.inbound.AuditLogUseCase;
+import app.neuland.security.JwtTestFixture;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -52,6 +53,8 @@ class AuditLogResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
                 .when().get("/audit-logs")
                 .then()
                 .statusCode(200)
@@ -77,6 +80,8 @@ class AuditLogResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
                 .when().get("/audit-logs")
                 .then()
                 .statusCode(200)
@@ -92,6 +97,8 @@ class AuditLogResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
                 .queryParam("limit", 10)
                 .queryParam("cursor", "next-page")
                 .when().get("/audit-logs")
@@ -107,6 +114,8 @@ class AuditLogResourceTest {
                 .thenThrow(new IllegalArgumentException("Invalid cursor"));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
                 .queryParam("cursor", "invalid-cursor")
                 .when().get("/audit-logs")
                 .then()
@@ -116,5 +125,38 @@ class AuditLogResourceTest {
                 .body("status", is(500))
                 .body("detail", is("Unexpected error"))
                 .body("detail", not(containsString("Invalid cursor")));
+    }
+
+    @Test
+    void shouldAllowAdminToListAuditLogs() {
+        when(auditLogUseCase.list(null, null))
+                .thenReturn(new AuditLogPage(List.of(), null));
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
+                .when()
+                .get("/audit-logs")
+                .then()
+                .statusCode(200);
+    }
+    
+    @Test
+    void shouldRejectUnauthenticatedRequest() {
+        given()
+                .when()
+                .get("/audit-logs")
+                .then()
+                .statusCode(401);
+    }
+    
+    @Test
+    void shouldRejectUserWithoutAdminRole() {
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
+                .when()
+                .get("/audit-logs")
+                .then()
+                .statusCode(403);
     }
 }
