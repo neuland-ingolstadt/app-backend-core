@@ -18,6 +18,10 @@ public final class JwtTestFixture {
         return tokenWithGroup(SecurityRoles.adminRole);
     }
 
+    public static String announcementToken() {
+        return tokenWithGroup(SecurityRoles.announcementRole);
+    }
+
     public static String wrongGroupToken() {
         return tokenWithGroup("some-other-group");
     }

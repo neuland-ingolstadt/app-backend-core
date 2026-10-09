@@ -1,10 +1,13 @@
 package app.neuland.adapters.inbound.rest.announcements;
 
+import app.neuland.adapters.inbound.security.SecurityRoles;
 import app.neuland.backend.core.api.v0.AnnouncementsApi;
 import app.neuland.backend.core.api.v0.model.AnnouncementCreateRequest;
 import app.neuland.backend.core.api.v0.model.AnnouncementPatchRequest;
 import app.neuland.model.announcement.Announcement;
 import app.neuland.ports.inbound.AnnouncementUseCase;
+import jakarta.annotation.security.PermitAll;
+import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
@@ -23,6 +26,7 @@ public class AnnouncementResource implements AnnouncementsApi {
     }
 
     @Override
+    @PermitAll
     public Response listAnnouncements(Boolean includeInactive) {
         return Response
                 .ok(AnnouncementMapper.toListResponse(
@@ -32,6 +36,7 @@ public class AnnouncementResource implements AnnouncementsApi {
     }
 
     @Override
+    @PermitAll
     public Response getAnnouncement(Long announcementId) {
         return Response
                 .ok(AnnouncementMapper.toResponse(
@@ -41,6 +46,10 @@ public class AnnouncementResource implements AnnouncementsApi {
     }
 
     @Override
+    @RolesAllowed({
+            SecurityRoles.announcementRole,
+            SecurityRoles.adminRole
+    })
     public Response createAnnouncement(AnnouncementCreateRequest announcementCreateRequest) {
         Announcement created = announcementUseCase.create(
                 AnnouncementMapper.toDomain(announcementCreateRequest)
@@ -57,6 +66,10 @@ public class AnnouncementResource implements AnnouncementsApi {
     }
 
     @Override
+    @RolesAllowed({
+            SecurityRoles.announcementRole,
+            SecurityRoles.adminRole
+    })
     public Response updateAnnouncement(
             Long announcementId,
             AnnouncementPatchRequest announcementPatchRequest
@@ -75,6 +88,10 @@ public class AnnouncementResource implements AnnouncementsApi {
     }
 
     @Override
+    @RolesAllowed({
+            SecurityRoles.announcementRole,
+            SecurityRoles.adminRole
+    })
     public Response deleteAnnouncement(Long announcementId) {
         announcementUseCase.delete(announcementId);
 
