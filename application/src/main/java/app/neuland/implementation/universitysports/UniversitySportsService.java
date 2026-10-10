@@ -1,4 +1,4 @@
-package app.neuland.implementation;
+package app.neuland.implementation.universitysports;
 
 import app.neuland.model.universitysports.Sports;
 import app.neuland.ports.inbound.UniversitySportsUseCase;
