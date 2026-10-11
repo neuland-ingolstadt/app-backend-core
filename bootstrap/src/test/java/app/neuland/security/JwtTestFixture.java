@@ -22,6 +22,8 @@ public final class JwtTestFixture {
         return tokenWithGroup(SecurityRoles.announcementRole);
     }
 
+    public static String sportsToken() { return tokenWithGroup(SecurityRoles.sportRole); }
+
     public static String wrongGroupToken() {
         return tokenWithGroup("some-other-group");
     }

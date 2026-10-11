@@ -8,6 +8,7 @@ import app.neuland.model.universitysports.SportsCategory;
 import app.neuland.model.universitysports.SportsContent;
 import app.neuland.model.universitysports.Weekday;
 import app.neuland.ports.inbound.UniversitySportsUseCase;
+import app.neuland.security.JwtTestFixture;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -46,6 +47,8 @@ class UniversitySportsResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .when().get("/university-sports")
                 .then()
                 .statusCode(200)
@@ -74,6 +77,8 @@ class UniversitySportsResourceTest {
         when(universitySportsUseCase.list()).thenReturn(List.of());
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .when().get("/university-sports")
                 .then()
                 .statusCode(200)
@@ -101,6 +106,8 @@ class UniversitySportsResourceTest {
         when(universitySportsUseCase.create(any())).thenReturn(sports(7L));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -150,6 +157,8 @@ class UniversitySportsResourceTest {
         when(universitySportsUseCase.create(any())).thenReturn(sports(8L, null, null, null));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -194,6 +203,8 @@ class UniversitySportsResourceTest {
     @Test
     void shouldRejectCreateWithMissingContents() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -218,6 +229,8 @@ class UniversitySportsResourceTest {
     @Test
     void shouldRejectCreateWithUnknownCampus() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -249,6 +262,8 @@ class UniversitySportsResourceTest {
         when(universitySportsUseCase.update(anyLong(), any())).thenReturn(sports(3L, null, null, null));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -290,6 +305,8 @@ class UniversitySportsResourceTest {
     @Test
     void shouldDelete() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .when().delete("/university-sports/5")
                 .then()
                 .statusCode(204);
@@ -320,6 +337,8 @@ class UniversitySportsResourceTest {
                 .delete(99L);
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.sportsToken())
                 .when().delete("/university-sports/99")
                 .then()
                 .statusCode(404)
@@ -342,6 +361,85 @@ class UniversitySportsResourceTest {
                 .body("status", is(500))
                 .body("detail", is("Unexpected error"))
                 .body("instance", endsWith("/university-sports"));
+    }
+
+    @Test
+    void shouldRejectUnauthenticatedCreate() {
+        given()
+                .contentType("application/json")
+                .body("""
+                    {
+                      "contents": {
+                        "DE": { "title": "Basketball", "description": "Offenes Training" }
+                      },
+                      "campus": "INGOLSTADT",
+                      "location": "Sporthalle 1",
+                      "weekday": "MONDAY",
+                      "startTime": "18:00:00Z",
+                      "requiresRegistration": true,
+                      "sportsCategory": "BASKETBALL"
+                    }
+                    """)
+                .when().post("/university-sports")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectUnauthenticatedUpdate() {
+        given()
+                .when().patch("/university-sports/3")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectUnauthenticatedDelete() {
+        given()
+                .when().delete("/university-sports/5")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectCreateForUserWithoutSportsRole() {
+        given()
+                .auth().oauth2(JwtTestFixture.reportsToken())
+                .contentType("application/json")
+                .body("""
+                    {
+                      "contents": {
+                        "DE": { "title": "Basketball", "description": "Offenes Training" }
+                      },
+                      "campus": "INGOLSTADT",
+                      "location": "Sporthalle 1",
+                      "weekday": "MONDAY",
+                      "startTime": "18:00:00Z",
+                      "requiresRegistration": true,
+                      "sportsCategory": "BASKETBALL"
+                    }
+                    """)
+                .when().post("/university-sports")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void shouldRejectUpdateForUserWithoutSportsRole() {
+        given()
+                .auth().oauth2(JwtTestFixture.reportsToken())
+                .when().patch("/university-sports/3")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    void shouldRejectDeleteForUserWithoutSportsRole() {
+        given()
+                .auth().oauth2(JwtTestFixture.reportsToken())
+                .when().delete("/university-sports/5")
+                .then()
+                .statusCode(403);
     }
 
     private static Sports sports(Long id) {
