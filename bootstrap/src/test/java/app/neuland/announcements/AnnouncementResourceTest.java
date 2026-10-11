@@ -7,6 +7,7 @@ import app.neuland.model.announcement.Platform;
 import app.neuland.model.announcement.UserKind;
 import app.neuland.model.shared.Language;
 import app.neuland.ports.inbound.AnnouncementUseCase;
+import app.neuland.security.JwtTestFixture;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
@@ -48,6 +49,8 @@ class AnnouncementResourceTest {
         ));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().get("/announcements")
                 .then()
                 .statusCode(200)
@@ -73,6 +76,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.list(false)).thenReturn(List.of());
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().get("/announcements")
                 .then()
                 .statusCode(200)
@@ -84,6 +89,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.list(true)).thenReturn(List.of(announcement(1L)));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .queryParam("includeInactive", true)
                 .when().get("/announcements")
                 .then()
@@ -98,6 +105,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.get(1L)).thenReturn(announcement(1L));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().get("/announcements/1")
                 .then()
                 .statusCode(200)
@@ -111,6 +120,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.create(any())).thenReturn(announcement(7L));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -156,6 +167,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.create(any())).thenReturn(announcement(8L, null, null));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -196,6 +209,8 @@ class AnnouncementResourceTest {
     @Test
     void shouldRejectCreateWithMissingContents() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -219,6 +234,8 @@ class AnnouncementResourceTest {
     @Test
     void shouldRejectCreateWithUnknownPlatform() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -249,6 +266,8 @@ class AnnouncementResourceTest {
         when(announcementUseCase.update(anyLong(), any())).thenReturn(announcement(3L, null, null));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .contentType("application/json")
                 .body("""
                         {
@@ -288,6 +307,8 @@ class AnnouncementResourceTest {
     @Test
     void shouldDelete() {
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().delete("/announcements/5")
                 .then()
                 .statusCode(204);
@@ -301,6 +322,8 @@ class AnnouncementResourceTest {
                 .thenThrow(new AnnouncementNotFoundException(99L));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().get("/announcements/99")
                 .then()
                 .statusCode(404)
@@ -318,6 +341,8 @@ class AnnouncementResourceTest {
                 .delete(99L);
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().delete("/announcements/99")
                 .then()
                 .statusCode(404)
@@ -332,6 +357,8 @@ class AnnouncementResourceTest {
                 .thenThrow(new IllegalStateException("database is on fire"));
 
         given()
+                .auth()
+                .oauth2(JwtTestFixture.announcementToken())
                 .when().get("/announcements")
                 .then()
                 .statusCode(500)
@@ -341,6 +368,98 @@ class AnnouncementResourceTest {
                 .body("detail", is("Unexpected error"))
                 .body("instance", endsWith("/announcements"));
     }
+
+     @Test
+     void shouldRejectUnauthenticatedCreate() {
+        given()
+             .contentType("application/json")
+             .body("""
+                        {
+                          "platforms": ["WEB"],
+                          "userKinds": ["GUEST"],
+                          "contents": {
+                            "DE": {
+                              "title": "Neuer Titel",
+                              "description": "Neue Beschreibung"
+                            }
+                          },
+                          "startDateTime": "2026-01-01T00:00:00Z",
+                          "endDateTime": "2026-12-31T23:59:59Z",
+                          "priority": 5
+                        }
+                        """)
+             .when()
+             .post("/announcements")
+             .then()
+             .statusCode(401);
+     }
+     
+     @Test
+     void shouldRejectUnauthenticatedUpdate() {
+        given()
+             .when()
+             .patch("/announcements/3")
+             .then()
+             .statusCode(401);
+     }
+     
+     @Test
+     void shouldRejectUnauthenticatedDelete() {
+        given()
+             .when()
+             .delete("/announcements/5")
+             .then()
+             .statusCode(401);
+     }
+     
+     @Test
+     void shouldRejectCreateForUserWithoutAnnouncementRole() {
+        given()
+             .auth()
+             .oauth2(JwtTestFixture.reportsToken())
+             .contentType("application/json")
+             .body("""
+                        {
+                          "platforms": ["WEB"],
+                          "userKinds": ["GUEST"],
+                          "contents": {
+                            "DE": {
+                              "title": "Neuer Titel",
+                              "description": "Neue Beschreibung"
+                            }
+                          },
+                          "startDateTime": "2026-01-01T00:00:00Z",
+                          "endDateTime": "2026-12-31T23:59:59Z",
+                          "priority": 5
+                        }
+                        """)
+             .when()
+             .post("/announcements")
+             .then()
+             .statusCode(403);
+     }
+     
+     @Test
+     void shouldRejectUpdateForUserWithoutAnnouncementRole() {
+        given()
+             .auth()
+             .oauth2(JwtTestFixture.reportsToken())
+             .when()
+             .patch("/announcements/3")
+             .then()
+             .statusCode(403);
+     }
+     
+     @Test
+     void shouldRejectDeleteForUserWithoutAnnouncementRole() {
+        given()
+             .auth()
+             .oauth2(JwtTestFixture.reportsToken())
+             .when()
+             .delete("/announcements/5")
+             .then()
+             .statusCode(403);
+     }
 
     private static Announcement announcement(Long id) {
         return announcement(id, URL, IMAGE_URL);
