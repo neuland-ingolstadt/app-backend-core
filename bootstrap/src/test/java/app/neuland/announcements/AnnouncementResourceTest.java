@@ -131,6 +131,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Title",
+                              "description": "Description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
@@ -153,7 +157,10 @@ class AnnouncementResourceTest {
                 null,
                 Set.of(Platform.WEB),
                 Set.of(UserKind.STUDENT),
-                Map.of(Language.DE, new AnnouncementContent("Titel", "Beschreibung")),
+                Map.of(
+                        Language.DE, new AnnouncementContent("Titel", "Beschreibung"),
+                        Language.EN, new AnnouncementContent("Title", "Description")
+                ),
                 START,
                 END,
                 1,
@@ -178,6 +185,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Title",
+                              "description": "Description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
@@ -197,7 +208,10 @@ class AnnouncementResourceTest {
                 null,
                 Set.of(Platform.WEB),
                 Set.of(UserKind.STUDENT),
-                Map.of(Language.DE, new AnnouncementContent("Titel", "Beschreibung")),
+                Map.of(
+                        Language.DE, new AnnouncementContent("Titel", "Beschreibung"),
+                        Language.EN, new AnnouncementContent("Title", "Description")
+                ),
                 START,
                 END,
                 1,
@@ -245,6 +259,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Title",
+                              "description": "Description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
@@ -277,6 +295,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
+                            },
+                            "en": {
+                              "title": "New Title",
+                              "description": "New description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
@@ -295,7 +317,10 @@ class AnnouncementResourceTest {
                 3L,
                 Set.of(Platform.WEB),
                 Set.of(UserKind.GUEST),
-                Map.of(Language.DE, new AnnouncementContent("Neuer Titel", "Neue Beschreibung")),
+                Map.of(
+                        Language.DE, new AnnouncementContent("Neuer Titel", "Neue Beschreibung"),
+                        Language.EN, new AnnouncementContent("New Title", "New description")
+                ),
                 START,
                 END,
                 5,
@@ -381,6 +406,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
+                            },
+                            "en": {
+                              "title": "New Title",
+                              "description": "New description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
@@ -426,6 +455,10 @@ class AnnouncementResourceTest {
                             "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
+                            },
+                            "en": {
+                              "title": "New Title",
+                              "description": "New description"
                             }
                           },
                           "startDateTime": "2026-01-01T00:00:00Z",
