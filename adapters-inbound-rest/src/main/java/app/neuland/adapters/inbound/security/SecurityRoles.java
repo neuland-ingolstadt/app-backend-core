@@ -1,4 +1,4 @@
-package app.neuland.adapters.inbound.rest.security;
+package app.neuland.adapters.inbound.security;
 
 /**
  * Dashboard JWT roles, mirrored from the legacy backend
@@ -12,9 +12,9 @@ package app.neuland.adapters.inbound.rest.security;
  * legacy {@code checkAuthorization} behavior (required role <em>or</em>
  * admin).</p>
  */
-public final class DashboardRoles {
+public final class SecurityRoles {
 
-    private DashboardRoles() {
+    private SecurityRoles() {
     }
 
     /** Super-admin role, accepted by every protected endpoint. */

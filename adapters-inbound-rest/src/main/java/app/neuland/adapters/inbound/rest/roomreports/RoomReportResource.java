@@ -1,6 +1,6 @@
 package app.neuland.adapters.inbound.rest.roomreports;
 
-import app.neuland.adapters.inbound.rest.security.DashboardRoles;
+import app.neuland.adapters.inbound.security.SecurityRoles;
 import app.neuland.backend.core.api.v0.RoomReportsApi;
 import app.neuland.backend.core.api.v0.model.CreateRoomReportRequest;
 import app.neuland.backend.core.api.v0.model.RoomReportPatchRequest;
@@ -29,7 +29,7 @@ public class RoomReportResource implements RoomReportsApi {
     }
 
     @Override
-    @RolesAllowed({ DashboardRoles.REPORTS, DashboardRoles.ADMIN })
+    @RolesAllowed({ SecurityRoles.REPORTS, SecurityRoles.ADMIN })
     public Response listRoomReports() {
         return Response
                 .ok(RoomReportMapper.toListResponse(roomReportUseCase.list()))
@@ -52,7 +52,7 @@ public class RoomReportResource implements RoomReportsApi {
     }
 
     @Override
-    @RolesAllowed({ DashboardRoles.REPORTS, DashboardRoles.ADMIN })
+    @RolesAllowed({ SecurityRoles.REPORTS, SecurityRoles.ADMIN })
     public Response resolveRoomReport(
             Long roomReportId,
             RoomReportPatchRequest roomReportPatchRequest
