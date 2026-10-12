@@ -3,7 +3,9 @@ package app.neuland.adapters.inbound.rest.roomreports;
 import app.neuland.adapters.inbound.security.SecurityRoles;
 import app.neuland.backend.core.api.v0.RoomReportsApi;
 import app.neuland.backend.core.api.v0.model.CreateRoomReportRequest;
+import app.neuland.backend.core.api.v0.model.RoomReportListResponse;
 import app.neuland.backend.core.api.v0.model.RoomReportPatchRequest;
+import app.neuland.backend.core.api.v0.model.RoomReportResponse;
 import app.neuland.ports.inbound.RoomReportUseCase;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
@@ -11,6 +13,7 @@ import jakarta.inject.Inject;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
+import org.jboss.resteasy.reactive.RestResponse;
 
 public class RoomReportResource implements RoomReportsApi {
 
@@ -29,24 +32,27 @@ public class RoomReportResource implements RoomReportsApi {
             SecurityRoles.reportsRole,
             SecurityRoles.adminRole
     })
-    public Response listRoomReports() {
-        return Response
-                .ok(RoomReportMapper.toListResponse(roomReportUseCase.list()))
-                .build();
+    public RestResponse<RoomReportListResponse> listRoomReports() {
+        return RestResponse.ok(
+                RoomReportMapper.toListResponse(roomReportUseCase.list())
+        );
     }
 
     @Override
     @PermitAll
-    public Response createRoomReport(CreateRoomReportRequest createRoomReportRequest) {
+    public RestResponse<RoomReportResponse> createRoomReport(
+            CreateRoomReportRequest createRoomReportRequest
+    ) {
         Long id = roomReportUseCase.create(RoomReportMapper.toDomain(createRoomReportRequest));
 
-        return Response
-                .created(
-                        uriInfo.getAbsolutePathBuilder()
-                                .path(String.valueOf(id))
-                                .build()
+        return RestResponse.ResponseBuilder
+                .create(
+                        Response.Status.CREATED,
+                        RoomReportMapper.toIdResponse(id)
                 )
-                .entity(RoomReportMapper.toIdResponse(id))
+                .location(uriInfo.getAbsolutePathBuilder()
+                        .path(String.valueOf(id))
+                        .build())
                 .build();
     }
 
@@ -55,7 +61,7 @@ public class RoomReportResource implements RoomReportsApi {
             SecurityRoles.reportsRole,
             SecurityRoles.adminRole
     })
-    public Response resolveRoomReport(
+    public RestResponse<RoomReportResponse> resolveRoomReport(
             Long roomReportId,
             RoomReportPatchRequest roomReportPatchRequest
     ) {
@@ -64,8 +70,6 @@ public class RoomReportResource implements RoomReportsApi {
                 roomReportPatchRequest.getResolved()
         );
 
-        return Response
-                .ok(RoomReportMapper.toIdResponse(id))
-                .build();
+        return RestResponse.ok(RoomReportMapper.toIdResponse(id));
     }
 }

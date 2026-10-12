@@ -2,10 +2,11 @@ package app.neuland.adapters.inbound.rest.auditlogs;
 
 import app.neuland.adapters.inbound.security.SecurityRoles;
 import app.neuland.backend.core.api.v0.AuditLogsApi;
+import app.neuland.backend.core.api.v0.model.AuditLogListResponse;
 import app.neuland.ports.inbound.AuditLogUseCase;
 import jakarta.annotation.security.RolesAllowed;
-import jakarta.ws.rs.core.Response;
 import jakarta.inject.Inject;
+import org.jboss.resteasy.reactive.RestResponse;
 
 public class AuditLogResource implements AuditLogsApi {
 
@@ -18,11 +19,11 @@ public class AuditLogResource implements AuditLogsApi {
 
     @Override
     @RolesAllowed({
-        SecurityRoles.adminRole
+            SecurityRoles.adminRole
     })
-    public Response listAuditLogs(Long limit, String cursor) {
-        return Response
-            .ok(AuditLogMapper.mapToAuditLogListResponse(auditLogUseCase.list(limit, cursor)))
-            .build();
+    public RestResponse<AuditLogListResponse> listAuditLogs(Long limit, String cursor) {
+        return RestResponse.ok(
+                AuditLogMapper.mapToAuditLogListResponse(auditLogUseCase.list(limit, cursor))
+        );
     }
 }
