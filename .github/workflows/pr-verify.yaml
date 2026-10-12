@@ -43,3 +43,13 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
         run: ./mvnw -B verify org.sonarsource.scanner.maven:sonar-maven-plugin:sonar
+
+  contract-drift:
+    name: Contract drift check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Check pinned contract vs implementation
+        run: python3 .github/scripts/check-contract-drift.py

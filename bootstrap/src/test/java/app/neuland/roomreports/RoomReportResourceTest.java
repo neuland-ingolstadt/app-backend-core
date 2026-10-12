@@ -6,6 +6,7 @@ import app.neuland.model.roomreport.RoomReportCategory;
 import app.neuland.ports.inbound.RoomReportUseCase;
 import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
+import io.quarkus.test.security.TestSecurity;
 import org.junit.jupiter.api.Test;
 
 import java.time.Instant;
@@ -32,6 +33,7 @@ class RoomReportResourceTest {
     RoomReportUseCase roomReportUseCase;
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldReturnList() {
         when(roomReportUseCase.list()).thenReturn(List.of(
                 new RoomReport(1L, "A101", RoomReportCategory.MISSING, "The beamer is not lost, it is in the cloud.", null),
@@ -54,6 +56,7 @@ class RoomReportResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldReturnEmptyList() {
         when(roomReportUseCase.list()).thenReturn(List.of());
 
@@ -66,6 +69,7 @@ class RoomReportResourceTest {
 
     @Test
     void shouldCreate() {
+        // No @TestSecurity: creating a room report is a public endpoint.
         when(roomReportUseCase.create(any())).thenReturn(7L);
 
         given()
@@ -152,6 +156,7 @@ class RoomReportResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldResolve() {
         when(roomReportUseCase.resolve(anyLong(), any(Boolean.class))).thenReturn(3L);
 
@@ -171,6 +176,7 @@ class RoomReportResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldRejectResolveWithoutResolvedFlag() {
         given()
                 .contentType("application/json")
@@ -184,6 +190,7 @@ class RoomReportResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldReturnNotFound() {
         when(roomReportUseCase.resolve(anyLong(), any(Boolean.class)))
                 .thenThrow(new RoomReportNotFoundException(99L));
@@ -207,6 +214,7 @@ class RoomReportResourceTest {
     }
 
     @Test
+    @TestSecurity(user = "reports-user", roles = "next-dashboard-reports")
     void shouldReturnProblemForUnhandledException() {
         when(roomReportUseCase.list())
                 .thenThrow(new IllegalStateException("database is on fire"));
@@ -233,5 +241,63 @@ class RoomReportResourceTest {
                 .body("title", is("Not Found"))
                 .body("status", is(404))
                 .body("instance", endsWith("/nope"));
+    }
+
+    @Test
+    void shouldRejectListWithoutToken() {
+        given()
+                .when().get("/room-reports")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "sports-user", roles = "next-dashboard-sports")
+    void shouldRejectListWithWrongRole() {
+        given()
+                .when().get("/room-reports")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
+    @TestSecurity(user = "admin", roles = "next-dashboard-admin")
+    void shouldReturnListForAdmin() {
+        when(roomReportUseCase.list()).thenReturn(List.of());
+
+        given()
+                .when().get("/room-reports")
+                .then()
+                .statusCode(200)
+                .body("roomReports.size()", is(0));
+    }
+
+    @Test
+    void shouldRejectResolveWithoutToken() {
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "resolved": true
+                        }
+                        """)
+                .when().patch("/room-reports/3")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    @TestSecurity(user = "sports-user", roles = "next-dashboard-sports")
+    void shouldRejectResolveWithWrongRole() {
+        given()
+                .contentType("application/json")
+                .body("""
+                        {
+                          "resolved": true
+                        }
+                        """)
+                .when().patch("/room-reports/3")
+                .then()
+                .statusCode(403);
     }
 }
