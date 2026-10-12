@@ -23,24 +23,25 @@ record RoomReportMapper() {
     }
 
     static RoomReportListResponse toListResponse(List<RoomReport> reports) {
-        return new RoomReportListResponse(
-                reports.stream()
-                        .map(RoomReportMapper::toApiReport)
-                        .toList()
-        );
+        RoomReportListResponse response = new RoomReportListResponse();
+        response.setRoomReports(reports.stream()
+                .map(RoomReportMapper::toApiReport)
+                .toList());
+        return response;
     }
 
     static RoomReportResponse toIdResponse(Long id) {
-        return new RoomReportResponse(id);
+        RoomReportResponse response = new RoomReportResponse();
+        response.setId(id);
+        return response;
     }
 
     private static app.neuland.backend.core.api.v0.model.RoomReport toApiReport(RoomReport report) {
         app.neuland.backend.core.api.v0.model.RoomReport api =
-                new app.neuland.backend.core.api.v0.model.RoomReport(
-                        report.id(),
-                        report.room(),
-                        toApiCategory(report.reason())
-                );
+                new app.neuland.backend.core.api.v0.model.RoomReport();
+        api.setId(report.id());
+        api.setRoom(report.room());
+        api.setReason(toApiCategory(report.reason()));
         api.setDescription(report.description());
         if (report.resolvedAt() != null) {
             api.setResolvedAt(report.resolvedAt().atOffset(ZoneOffset.UTC));

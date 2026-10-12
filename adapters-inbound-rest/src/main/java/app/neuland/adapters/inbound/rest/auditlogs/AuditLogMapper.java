@@ -14,31 +14,25 @@ import java.time.ZoneOffset;
 record AuditLogMapper() {
 
     static AuditLogListResponse mapToAuditLogListResponse(AuditLogPage auditLogPage) {
-        AuditLogListResponse auditLogListResponse = new AuditLogListResponse(
-            auditLogPage.auditLogs()
-            .stream()
-            .map(AuditLogMapper::mapToAuditLogEntry)
-            .toList()
-        );
-
+        AuditLogListResponse auditLogListResponse = new AuditLogListResponse();
+        auditLogListResponse.setAuditLogs(auditLogPage.auditLogs()
+                .stream()
+                .map(AuditLogMapper::mapToAuditLogEntry)
+                .toList());
         auditLogListResponse.setNextCursor(auditLogPage.nextCursor());
-
         return auditLogListResponse;
     }
 
     private static app.neuland.backend.core.api.v0.model.AuditLogEntry mapToAuditLogEntry(AuditLogEntry auditLogEntry) {
         app.neuland.backend.core.api.v0.model.AuditLogEntry apiAuditLogEntry =
-                new app.neuland.backend.core.api.v0.model.AuditLogEntry(
-                        auditLogEntry.id(),
-                        auditLogEntry.entity(),
-                        toAuditLogOperationEnum(auditLogEntry.operation()),
-                        toOffsetDateTime(auditLogEntry.occurredAt())
-                );
-
+                new app.neuland.backend.core.api.v0.model.AuditLogEntry();
+        apiAuditLogEntry.setId(auditLogEntry.id());
+        apiAuditLogEntry.setEntity(auditLogEntry.entity());
+        apiAuditLogEntry.setOperation(toAuditLogOperationEnum(auditLogEntry.operation()));
+        apiAuditLogEntry.setCreatedAt(toOffsetDateTime(auditLogEntry.occurredAt()));
         apiAuditLogEntry.setEntityId(auditLogEntry.entityId());
         apiAuditLogEntry.setName(auditLogEntry.name());
         apiAuditLogEntry.setUserId(auditLogEntry.userId());
-
         return apiAuditLogEntry;
     }
 
