@@ -54,9 +54,9 @@ class UniversitySportsResourceTest {
                 .statusCode(200)
                 .body("sports.size()", is(2))
                 .body("sports.[0].id", is(1))
-                .body("sports.[0].contents.DE.title", is("Basketball"))
-                .body("sports.[0].contents.DE.description", is("Beschreibung"))
-                .body("sports.[0].contents.EN.title", is("Basketball"))
+                .body("sports.[0].contents.de.title", is("Basketball"))
+                .body("sports.[0].contents.de.description", is("Beschreibung"))
+                .body("sports.[0].contents.en.title", is("Basketball"))
                 .body("sports.[0].campus", is("INGOLSTADT"))
                 .body("sports.[0].location", is("Sporthalle"))
                 .body("sports.[0].weekday", is("MONDAY"))
@@ -94,7 +94,7 @@ class UniversitySportsResourceTest {
                 .then()
                 .statusCode(200)
                 .body("id", is(1))
-                .body("contents.DE.title", is("Basketball"))
+                .body("contents.de.title", is("Basketball"))
                 .body("campus", is("INGOLSTADT"))
                 .body("weekday", is("MONDAY"))
                 .body("startTime", is("18:00:00Z"))
@@ -112,7 +112,7 @@ class UniversitySportsResourceTest {
                 .body("""
                         {
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
                             }
@@ -133,7 +133,7 @@ class UniversitySportsResourceTest {
                 .statusCode(201)
                 .header("Location", endsWith("/university-sports/7"))
                 .body("id", is(7))
-                .body("contents.DE.title", is("Basketball"))
+                .body("contents.de.title", is("Basketball"))
                 .body("startTime", is("18:00:00Z"))
                 .body("invitationLink", is(INVITATION_LINK));
 
@@ -163,7 +163,7 @@ class UniversitySportsResourceTest {
                 .body("""
                         {
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
                             }
@@ -235,7 +235,7 @@ class UniversitySportsResourceTest {
                 .body("""
                         {
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
                             }
@@ -268,7 +268,7 @@ class UniversitySportsResourceTest {
                 .body("""
                         {
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Volleyball",
                               "description": "Neue Beschreibung"
                             }
@@ -285,7 +285,7 @@ class UniversitySportsResourceTest {
                 .then()
                 .statusCode(200)
                 .body("id", is(3))
-                .body("contents.DE.title", is("Basketball"));
+                .body("contents.de.title", is("Basketball"));
 
         verify(universitySportsUseCase).update(3L, new Sports(
                 3L,
@@ -370,7 +370,7 @@ class UniversitySportsResourceTest {
                 .body("""
                     {
                       "contents": {
-                        "DE": { "title": "Basketball", "description": "Offenes Training" }
+                        "de": { "title": "Basketball", "description": "Offenes Training" }
                       },
                       "campus": "INGOLSTADT",
                       "location": "Sporthalle 1",
@@ -409,7 +409,7 @@ class UniversitySportsResourceTest {
                 .body("""
                     {
                       "contents": {
-                        "DE": { "title": "Basketball", "description": "Offenes Training" }
+                        "de": { "title": "Basketball", "description": "Offenes Training" }
                       },
                       "campus": "INGOLSTADT",
                       "location": "Sporthalle 1",

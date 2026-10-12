@@ -130,7 +130,7 @@ record AnnouncementMapper() {
         return contents.entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                        entry -> Language.valueOf(entry.getKey()),
+                        entry -> Language.fromCode(entry.getKey()),
                         entry -> toDomainContent(entry.getValue())
                 ));
     }
@@ -164,7 +164,7 @@ record AnnouncementMapper() {
         return contents.entrySet()
                 .stream()
                 .collect(Collectors.toMap(
-                        entry -> entry.getKey().name(),
+                        entry -> entry.getKey().code(),
                         entry -> toApiContent(entry.getValue())
                 ));
     }

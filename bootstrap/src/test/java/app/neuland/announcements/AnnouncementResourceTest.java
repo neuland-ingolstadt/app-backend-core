@@ -58,9 +58,9 @@ class AnnouncementResourceTest {
                 .body("announcements.[0].id", is(1))
                 .body("announcements.[0].platforms", containsInAnyOrder("WEB"))
                 .body("announcements.[0].userKinds", containsInAnyOrder("STUDENT", "GUEST"))
-                .body("announcements.[0].contents.DE.title", is("Titel"))
-                .body("announcements.[0].contents.DE.description", is("Beschreibung"))
-                .body("announcements.[0].contents.EN.title", is("Title"))
+                .body("announcements.[0].contents.de.title", is("Titel"))
+                .body("announcements.[0].contents.de.description", is("Beschreibung"))
+                .body("announcements.[0].contents.en.title", is("Title"))
                 .body("announcements.[0].startDateTime", is("2026-01-01T00:00:00Z"))
                 .body("announcements.[0].endDateTime", is("2026-12-31T23:59:59Z"))
                 .body("announcements.[0].priority", is(1))
@@ -112,7 +112,7 @@ class AnnouncementResourceTest {
                 .statusCode(200)
                 .body("id", is(1))
                 .body("platforms", containsInAnyOrder("WEB"))
-                .body("contents.DE.title", is("Titel"));
+                .body("contents.de.title", is("Titel"));
     }
 
     @Test
@@ -128,7 +128,7 @@ class AnnouncementResourceTest {
                           "platforms": ["WEB"],
                           "userKinds": ["STUDENT"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
                             }
@@ -145,7 +145,7 @@ class AnnouncementResourceTest {
                 .statusCode(201)
                 .header("Location", endsWith("/announcements/7"))
                 .body("id", is(7))
-                .body("contents.DE.title", is("Titel"))
+                .body("contents.de.title", is("Titel"))
                 .body("url", is(URL))
                 .body("imageUrl", is(IMAGE_URL));
 
@@ -175,7 +175,7 @@ class AnnouncementResourceTest {
                           "platforms": ["WEB"],
                           "userKinds": ["STUDENT"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
                             }
@@ -242,7 +242,7 @@ class AnnouncementResourceTest {
                           "platforms": ["NOPE"],
                           "userKinds": ["STUDENT"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Titel",
                               "description": "Beschreibung"
                             }
@@ -274,7 +274,7 @@ class AnnouncementResourceTest {
                           "platforms": ["WEB"],
                           "userKinds": ["GUEST"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
                             }
@@ -289,7 +289,7 @@ class AnnouncementResourceTest {
                 .statusCode(200)
                 .body("id", is(3))
                 .body("platforms", containsInAnyOrder("WEB"))
-                .body("contents.DE.title", is("Titel"));
+                .body("contents.de.title", is("Titel"));
 
         verify(announcementUseCase).update(3L, new Announcement(
                 3L,
@@ -378,7 +378,7 @@ class AnnouncementResourceTest {
                           "platforms": ["WEB"],
                           "userKinds": ["GUEST"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
                             }
@@ -423,7 +423,7 @@ class AnnouncementResourceTest {
                           "platforms": ["WEB"],
                           "userKinds": ["GUEST"],
                           "contents": {
-                            "DE": {
+                            "de": {
                               "title": "Neuer Titel",
                               "description": "Neue Beschreibung"
                             }
