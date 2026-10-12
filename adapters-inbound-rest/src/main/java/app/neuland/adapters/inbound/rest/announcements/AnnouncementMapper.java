@@ -1,5 +1,6 @@
 package app.neuland.adapters.inbound.rest.announcements;
 
+import app.neuland.backend.core.api.v0.model.AnnouncementContents;
 import app.neuland.backend.core.api.v0.model.AnnouncementCreateRequest;
 import app.neuland.backend.core.api.v0.model.AnnouncementListResponse;
 import app.neuland.backend.core.api.v0.model.AnnouncementPatchRequest;
@@ -15,8 +16,10 @@ import java.net.URI;
 import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -63,7 +66,7 @@ record AnnouncementMapper() {
                 new app.neuland.backend.core.api.v0.model.Announcement(
                         toApiPlatformSet(announcement.platforms()),
                         toApiUserKindSet(announcement.userKinds()),
-                        toApiContentsMap(announcement.contents()),
+                        toApiContents(announcement.contents()),
                         toApiDateTime(announcement.startDateTime()),
                         toApiDateTime(announcement.endDateTime()),
                         announcement.priority(),
@@ -78,7 +81,7 @@ record AnnouncementMapper() {
             Long id,
             Set<PlatformEnum> platforms,
             Set<UserKindEnum> userKinds,
-            Map<String, app.neuland.backend.core.api.v0.model.AnnouncementContent> contents,
+            AnnouncementContents contents,
             OffsetDateTime startDateTime,
             OffsetDateTime endDateTime,
             Integer priority,
@@ -89,7 +92,7 @@ record AnnouncementMapper() {
                 id,
                 toDomainPlatformSet(platforms),
                 toDomainUserKindSet(userKinds),
-                toDomainContentsMap(contents),
+                toDomainContents(contents),
                 toDomainDateTime(startDateTime),
                 toDomainDateTime(endDateTime),
                 priority,
@@ -120,19 +123,21 @@ record AnnouncementMapper() {
                 .collect(Collectors.toSet());
     }
 
-    private static Map<Language, AnnouncementContent> toDomainContentsMap(
-            Map<String, app.neuland.backend.core.api.v0.model.AnnouncementContent> contents
+    private static Map<Language, AnnouncementContent> toDomainContents(
+            AnnouncementContents contents
     ) {
         if (contents == null) {
             return Map.of();
         }
 
-        return contents.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> Language.fromCode(entry.getKey()),
-                        entry -> toDomainContent(entry.getValue())
-                ));
+        Map<Language, AnnouncementContent> mapped = new EnumMap<>(Language.class);
+        if (contents.getDe() != null) {
+            mapped.put(Language.DE, toDomainContent(contents.getDe()));
+        }
+        if (contents.getEn() != null) {
+            mapped.put(Language.EN, toDomainContent(contents.getEn()));
+        }
+        return Map.copyOf(mapped);
     }
 
     private static AnnouncementContent toDomainContent(
@@ -158,15 +163,18 @@ record AnnouncementMapper() {
                 .collect(Collectors.toSet());
     }
 
-    private static Map<String, app.neuland.backend.core.api.v0.model.AnnouncementContent> toApiContentsMap(
+    private static AnnouncementContents toApiContents(
             Map<Language, AnnouncementContent> contents
     ) {
-        return contents.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey().code(),
-                        entry -> toApiContent(entry.getValue())
-                ));
+        AnnouncementContent de = Objects.requireNonNull(
+                contents.get(Language.DE),
+                "Announcement is missing German content"
+        );
+        AnnouncementContent en = Objects.requireNonNull(
+                contents.get(Language.EN),
+                "Announcement is missing English content"
+        );
+        return new AnnouncementContents(toApiContent(de), toApiContent(en));
     }
 
     private static app.neuland.backend.core.api.v0.model.AnnouncementContent toApiContent(

@@ -2,6 +2,7 @@ package app.neuland.adapters.inbound.rest.universitysports;
 
 import app.neuland.backend.core.api.v0.model.CampusEnum;
 import app.neuland.backend.core.api.v0.model.SportsCategoryEnum;
+import app.neuland.backend.core.api.v0.model.SportsContents;
 import app.neuland.backend.core.api.v0.model.SportsCreateRequest;
 import app.neuland.backend.core.api.v0.model.SportsListResponse;
 import app.neuland.backend.core.api.v0.model.SportsPatchRequest;
@@ -19,9 +20,10 @@ import java.time.OffsetTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.format.DateTimeParseException;
+import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Objects;
 
 record UniversitySportsMapper() {
 
@@ -66,23 +68,40 @@ record UniversitySportsMapper() {
 
     static app.neuland.backend.core.api.v0.model.Sports toResponse(Sports sports) {
         app.neuland.backend.core.api.v0.model.Sports api =
-                new app.neuland.backend.core.api.v0.model.Sports(sports.id());
-        api.setContents(toApiContentsMap(sports.contents()));
-        api.setCampus(toApiCampus(sports.campus()));
-        api.setLocation(sports.location());
-        api.setWeekday(toApiWeekday(sports.weekday()));
-        api.setStartTime(toApiTime(sports.startTime()));
+                new app.neuland.backend.core.api.v0.model.Sports(
+                        Objects.requireNonNull(sports.id(), "Sports id is required"),
+                        toApiContents(sports.contents()),
+                        Objects.requireNonNull(
+                                toApiCampus(sports.campus()),
+                                "Sports campus is required"
+                        ),
+                        Objects.requireNonNull(
+                                sports.location(),
+                                "Sports location is required"
+                        ),
+                        Objects.requireNonNull(
+                                toApiWeekday(sports.weekday()),
+                                "Sports weekday is required"
+                        ),
+                        Objects.requireNonNull(
+                                toApiTime(sports.startTime()),
+                                "Sports startTime is required"
+                        ),
+                        sports.requiresRegistration(),
+                        Objects.requireNonNull(
+                                toApiCategory(sports.sportsCategory()),
+                                "Sports sportsCategory is required"
+                        )
+                );
         api.setEndTime(toApiTime(sports.endTime()));
-        api.setRequiresRegistration(sports.requiresRegistration());
         api.setInvitationLink(toApiUri(sports.invitationLink()));
         api.setEmail(sports.email());
-        api.setSportsCategory(toApiCategory(sports.sportsCategory()));
         return api;
     }
 
     private static Sports toDomain(
             Long id,
-            Map<String, app.neuland.backend.core.api.v0.model.SportsContent> contents,
+            SportsContents contents,
             CampusEnum campus,
             String location,
             WeekdayEnum weekday,
@@ -95,7 +114,7 @@ record UniversitySportsMapper() {
     ) {
         return new Sports(
                 id,
-                toDomainContentsMap(contents),
+                toDomainContents(contents),
                 toDomainCampus(campus),
                 location,
                 toDomainWeekday(weekday),
@@ -108,19 +127,19 @@ record UniversitySportsMapper() {
         );
     }
 
-    private static Map<Language, SportsContent> toDomainContentsMap(
-            Map<String, app.neuland.backend.core.api.v0.model.SportsContent> contents
-    ) {
+    private static Map<Language, SportsContent> toDomainContents(SportsContents contents) {
         if (contents == null) {
             return Map.of();
         }
 
-        return contents.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> Language.fromCode(entry.getKey()),
-                        entry -> toDomainContent(entry.getValue())
-                ));
+        Map<Language, SportsContent> mapped = new EnumMap<>(Language.class);
+        if (contents.getDe() != null) {
+            mapped.put(Language.DE, toDomainContent(contents.getDe()));
+        }
+        if (contents.getEn() != null) {
+            mapped.put(Language.EN, toDomainContent(contents.getEn()));
+        }
+        return Map.copyOf(mapped);
     }
 
     private static SportsContent toDomainContent(
@@ -132,15 +151,16 @@ record UniversitySportsMapper() {
         );
     }
 
-    private static Map<String, app.neuland.backend.core.api.v0.model.SportsContent> toApiContentsMap(
-            Map<Language, SportsContent> contents
-    ) {
-        return contents.entrySet()
-                .stream()
-                .collect(Collectors.toMap(
-                        entry -> entry.getKey().code(),
-                        entry -> toApiContent(entry.getValue())
-                ));
+    private static SportsContents toApiContents(Map<Language, SportsContent> contents) {
+        SportsContent de = Objects.requireNonNull(
+                contents.get(Language.DE),
+                "Sports is missing German content"
+        );
+        SportsContent en = Objects.requireNonNull(
+                contents.get(Language.EN),
+                "Sports is missing English content"
+        );
+        return new SportsContents(toApiContent(de), toApiContent(en));
     }
 
     private static app.neuland.backend.core.api.v0.model.SportsContent toApiContent(
@@ -202,4 +222,3 @@ record UniversitySportsMapper() {
         return url != null ? URI.create(url) : null;
     }
 }
-
