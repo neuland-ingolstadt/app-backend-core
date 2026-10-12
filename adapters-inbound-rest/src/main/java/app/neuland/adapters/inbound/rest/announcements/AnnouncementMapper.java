@@ -54,24 +54,23 @@ record AnnouncementMapper() {
     }
 
     static AnnouncementListResponse toListResponse(List<Announcement> announcements) {
-        return new AnnouncementListResponse(
-                announcements.stream()
-                        .map(AnnouncementMapper::toResponse)
-                        .toList()
-        );
+        AnnouncementListResponse response = new AnnouncementListResponse();
+        response.setAnnouncements(announcements.stream()
+                .map(AnnouncementMapper::toResponse)
+                .toList());
+        return response;
     }
 
     static app.neuland.backend.core.api.v0.model.Announcement toResponse(Announcement announcement) {
         app.neuland.backend.core.api.v0.model.Announcement api =
-                new app.neuland.backend.core.api.v0.model.Announcement(
-                        toApiPlatformSet(announcement.platforms()),
-                        toApiUserKindSet(announcement.userKinds()),
-                        toApiContents(announcement.contents()),
-                        toApiDateTime(announcement.startDateTime()),
-                        toApiDateTime(announcement.endDateTime()),
-                        announcement.priority(),
-                        announcement.id()
-                );
+                new app.neuland.backend.core.api.v0.model.Announcement();
+        api.setPlatforms(toApiPlatformSet(announcement.platforms()));
+        api.setUserKinds(toApiUserKindSet(announcement.userKinds()));
+        api.setContents(toApiContents(announcement.contents()));
+        api.setStartDateTime(toApiDateTime(announcement.startDateTime()));
+        api.setEndDateTime(toApiDateTime(announcement.endDateTime()));
+        api.setPriority(announcement.priority());
+        api.setId(announcement.id());
         api.setUrl(toApiUri(announcement.url()));
         api.setImageUrl(toApiUri(announcement.imageUrl()));
         return api;
@@ -174,16 +173,20 @@ record AnnouncementMapper() {
                 contents.get(Language.EN),
                 "Announcement is missing English content"
         );
-        return new AnnouncementContents(toApiContent(de), toApiContent(en));
+        AnnouncementContents api = new AnnouncementContents();
+        api.setDe(toApiContent(de));
+        api.setEn(toApiContent(en));
+        return api;
     }
 
     private static app.neuland.backend.core.api.v0.model.AnnouncementContent toApiContent(
             AnnouncementContent content
     ) {
-        return new app.neuland.backend.core.api.v0.model.AnnouncementContent(
-                content.title(),
-                content.description()
-        );
+        app.neuland.backend.core.api.v0.model.AnnouncementContent api =
+                new app.neuland.backend.core.api.v0.model.AnnouncementContent();
+        api.setTitle(content.title());
+        api.setDescription(content.description());
+        return api;
     }
 
     private static Instant toDomainDateTime(OffsetDateTime dateTime) {

@@ -60,42 +60,42 @@ record UniversitySportsMapper() {
     }
 
     static SportsListResponse toListResponse(List<Sports> sports) {
-        return new SportsListResponse(sports.stream()
-                        .map(UniversitySportsMapper::toResponse)
-                        .toList()
-        );
+        SportsListResponse response = new SportsListResponse();
+        response.setSports(sports.stream()
+                .map(UniversitySportsMapper::toResponse)
+                .toList());
+        return response;
     }
 
     static app.neuland.backend.core.api.v0.model.Sports toResponse(Sports sports) {
         app.neuland.backend.core.api.v0.model.Sports api =
-                new app.neuland.backend.core.api.v0.model.Sports(
-                        Objects.requireNonNull(sports.id(), "Sports id is required"),
-                        toApiContents(sports.contents()),
-                        Objects.requireNonNull(
-                                toApiCampus(sports.campus()),
-                                "Sports campus is required"
-                        ),
-                        Objects.requireNonNull(
-                                sports.location(),
-                                "Sports location is required"
-                        ),
-                        Objects.requireNonNull(
-                                toApiWeekday(sports.weekday()),
-                                "Sports weekday is required"
-                        ),
-                        Objects.requireNonNull(
-                                toApiTime(sports.startTime()),
-                                "Sports startTime is required"
-                        ),
-                        sports.requiresRegistration(),
-                        Objects.requireNonNull(
-                                toApiCategory(sports.sportsCategory()),
-                                "Sports sportsCategory is required"
-                        )
-                );
+                new app.neuland.backend.core.api.v0.model.Sports();
+        api.setId(Objects.requireNonNull(sports.id(), "Sports id is required"));
+        api.setContents(toApiContents(sports.contents()));
+        api.setCampus(Objects.requireNonNull(
+                toApiCampus(sports.campus()),
+                "Sports campus is required"
+        ));
+        api.setLocation(Objects.requireNonNull(
+                sports.location(),
+                "Sports location is required"
+        ));
+        api.setWeekday(Objects.requireNonNull(
+                toApiWeekday(sports.weekday()),
+                "Sports weekday is required"
+        ));
+        api.setStartTime(Objects.requireNonNull(
+                toApiTime(sports.startTime()),
+                "Sports startTime is required"
+        ));
         api.setEndTime(toApiTime(sports.endTime()));
+        api.setRequiresRegistration(sports.requiresRegistration());
         api.setInvitationLink(toApiUri(sports.invitationLink()));
         api.setEmail(sports.email());
+        api.setSportsCategory(Objects.requireNonNull(
+                toApiCategory(sports.sportsCategory()),
+                "Sports sportsCategory is required"
+        ));
         return api;
     }
 
@@ -160,14 +160,18 @@ record UniversitySportsMapper() {
                 contents.get(Language.EN),
                 "Sports is missing English content"
         );
-        return new SportsContents(toApiContent(de), toApiContent(en));
+        SportsContents api = new SportsContents();
+        api.setDe(toApiContent(de));
+        api.setEn(toApiContent(en));
+        return api;
     }
 
     private static app.neuland.backend.core.api.v0.model.SportsContent toApiContent(
             SportsContent content
     ) {
         app.neuland.backend.core.api.v0.model.SportsContent api =
-                new app.neuland.backend.core.api.v0.model.SportsContent(content.title());
+                new app.neuland.backend.core.api.v0.model.SportsContent();
+        api.setTitle(content.title());
         api.setDescription(content.description());
         return api;
     }
