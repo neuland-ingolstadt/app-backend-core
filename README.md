@@ -13,7 +13,7 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 
 ## Related repos
 
-- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs (`app.neuland:backend-core-api-v0`)
+- [app-backend-contracts](https://github.com/neuland-ingolstadt/app-backend-contracts) — OpenAPI specs (`app.neuland:backend-core-api`)
 - [app-backend-food](https://github.com/neuland-ingolstadt/app-backend-food) — food data (called by Public API)
 - [app-backend-cloud-gateway](https://github.com/neuland-ingolstadt/app-backend-cloud-gateway) — external entry point
 - [neuland.app-backend](https://github.com/neuland-ingolstadt/neuland.app-backend) — legacy GraphQL backend (to be retired)
@@ -28,7 +28,7 @@ This is a multi-module Maven (hexagonal architecture) project:
 - `bootstrap` — Quarkus application wiring all modules together
 - `domain` — framework-free core entities/value objects
 
-Local builds need access to GitHub Packages for `backend-core-api-v0`
+Local builds need access to GitHub Packages for `backend-core-api`
 (`read:packages`). The server id must be `github-neuland-contracts` (see root POM).
 
 <details>

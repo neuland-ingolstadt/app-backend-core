@@ -18,7 +18,7 @@
         </dependency>
         <dependency>
             <groupId>app.neuland</groupId>
-            <artifactId>backend-core-api-v0</artifactId>
+            <artifactId>backend-core-api</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
