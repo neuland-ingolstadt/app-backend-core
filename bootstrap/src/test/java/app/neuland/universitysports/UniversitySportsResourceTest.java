@@ -115,6 +115,10 @@ class UniversitySportsResourceTest {
                             "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Basketball",
+                              "description": "Description"
                             }
                           },
                           "campus": "INGOLSTADT",
@@ -139,7 +143,10 @@ class UniversitySportsResourceTest {
 
         verify(universitySportsUseCase).create(new Sports(
                 null,
-                Map.of(Language.DE, new SportsContent("Basketball", "Beschreibung")),
+                Map.of(
+                        Language.DE, new SportsContent("Basketball", "Beschreibung"),
+                        Language.EN, new SportsContent("Basketball", "Description")
+                ),
                 Campus.INGOLSTADT,
                 "Sporthalle",
                 Weekday.MONDAY,
@@ -166,6 +173,10 @@ class UniversitySportsResourceTest {
                             "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Basketball",
+                              "description": "Description"
                             }
                           },
                           "campus": "INGOLSTADT",
@@ -187,7 +198,10 @@ class UniversitySportsResourceTest {
 
         verify(universitySportsUseCase).create(new Sports(
                 null,
-                Map.of(Language.DE, new SportsContent("Basketball", "Beschreibung")),
+                Map.of(
+                        Language.DE, new SportsContent("Basketball", "Beschreibung"),
+                        Language.EN, new SportsContent("Basketball", "Description")
+                ),
                 Campus.INGOLSTADT,
                 "Sporthalle",
                 Weekday.MONDAY,
@@ -238,6 +252,10 @@ class UniversitySportsResourceTest {
                             "de": {
                               "title": "Basketball",
                               "description": "Beschreibung"
+                            },
+                            "en": {
+                              "title": "Basketball",
+                              "description": "Description"
                             }
                           },
                           "campus": "NOPE",
@@ -271,6 +289,10 @@ class UniversitySportsResourceTest {
                             "de": {
                               "title": "Volleyball",
                               "description": "Neue Beschreibung"
+                            },
+                            "en": {
+                              "title": "Volleyball",
+                              "description": "New description"
                             }
                           },
                           "campus": "NEUBURG",
@@ -289,7 +311,10 @@ class UniversitySportsResourceTest {
 
         verify(universitySportsUseCase).update(3L, new Sports(
                 3L,
-                Map.of(Language.DE, new SportsContent("Volleyball", "Neue Beschreibung")),
+                Map.of(
+                        Language.DE, new SportsContent("Volleyball", "Neue Beschreibung"),
+                        Language.EN, new SportsContent("Volleyball", "New description")
+                ),
                 Campus.NEUBURG,
                 "Sportplatz",
                 Weekday.TUESDAY,
@@ -370,7 +395,11 @@ class UniversitySportsResourceTest {
                 .body("""
                     {
                       "contents": {
-                        "de": { "title": "Basketball", "description": "Offenes Training" }
+                        "de": { "title": "Basketball", "description": "Offenes Training" },
+                        "en": {
+                        "title": "Basketball",
+                        "description": "Open training"
+                        }
                       },
                       "campus": "INGOLSTADT",
                       "location": "Sporthalle 1",
@@ -409,7 +438,11 @@ class UniversitySportsResourceTest {
                 .body("""
                     {
                       "contents": {
-                        "de": { "title": "Basketball", "description": "Offenes Training" }
+                        "de": { "title": "Basketball", "description": "Offenes Training" },
+                        "en": {
+                        "title": "Basketball",
+                        "description": "Open training"
+                        }
                       },
                       "campus": "INGOLSTADT",
                       "location": "Sporthalle 1",
