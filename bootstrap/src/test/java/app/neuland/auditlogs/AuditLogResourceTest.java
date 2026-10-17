@@ -15,7 +15,6 @@ import java.util.List;
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.not;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -119,12 +118,12 @@ class AuditLogResourceTest {
                 .queryParam("cursor", "invalid-cursor")
                 .when().get("/audit-logs")
                 .then()
-                .statusCode(500)
+                .statusCode(400)
                 .contentType("application/problem+json")
-                .body("title", is("Internal Server Error"))
-                .body("status", is(500))
-                .body("detail", is("Unexpected error"))
-                .body("detail", not(containsString("Invalid cursor")));
+                .body("title", is("Bad Request"))
+                .body("status", is(400))
+                .body("detail", is("Invalid cursor"))
+                .body("instance", containsString("/audit-logs"));
     }
 
     @Test
