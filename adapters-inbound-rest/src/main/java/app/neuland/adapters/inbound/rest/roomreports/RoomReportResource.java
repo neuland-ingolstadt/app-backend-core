@@ -14,6 +14,8 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.reactive.RestResponse;
+import io.smallrye.faulttolerance.api.RateLimit;
+import java.time.temporal.ChronoUnit;
 
 public class RoomReportResource implements RoomReportsApi {
 
@@ -40,6 +42,7 @@ public class RoomReportResource implements RoomReportsApi {
 
     @Override
     @PermitAll
+    @RateLimit(value = 100, window = 1, windowUnit = ChronoUnit.MINUTES)
     public RestResponse<RoomReportResponse> createRoomReport(
             CreateRoomReportRequest createRoomReportRequest
     ) {
@@ -61,6 +64,7 @@ public class RoomReportResource implements RoomReportsApi {
             SecurityRoles.reportsRole,
             SecurityRoles.adminRole
     })
+    @RateLimit(value = 100, window = 1, windowUnit = ChronoUnit.MINUTES)
     public RestResponse<RoomReportResponse> resolveRoomReport(
             Long roomReportId,
             RoomReportPatchRequest roomReportPatchRequest
