@@ -101,6 +101,55 @@ class AnnouncementResourceTest {
     }
 
     @Test
+    void shouldAllowAdminToIncludeInactive() {
+        when(announcementUseCase.list(true)).thenReturn(List.of(announcement(1L)));
+
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.adminToken())
+                .queryParam("includeInactive", true)
+                .when().get("/announcements")
+                .then()
+                .statusCode(200)
+                .body("announcements.size()", is(1));
+
+        verify(announcementUseCase).list(true);
+    }
+
+    @Test
+    void shouldListActiveAnnouncementsWithoutAuth() {
+        when(announcementUseCase.list(false)).thenReturn(List.of(announcement(1L)));
+
+        given()
+                .when().get("/announcements")
+                .then()
+                .statusCode(200)
+                .body("announcements.size()", is(1));
+
+        verify(announcementUseCase).list(false);
+    }
+
+    @Test
+    void shouldRejectUnauthenticatedIncludeInactive() {
+        given()
+                .queryParam("includeInactive", true)
+                .when().get("/announcements")
+                .then()
+                .statusCode(401);
+    }
+
+    @Test
+    void shouldRejectIncludeInactiveWithoutAnnouncementRole() {
+        given()
+                .auth()
+                .oauth2(JwtTestFixture.reportsToken())
+                .queryParam("includeInactive", true)
+                .when().get("/announcements")
+                .then()
+                .statusCode(403);
+    }
+
+    @Test
     void shouldReturnSingleAnnouncement() {
         when(announcementUseCase.get(1L)).thenReturn(announcement(1L));
 
