@@ -2,6 +2,9 @@ package app.neuland.implementation.roomreports;
 
 import app.neuland.model.roomreport.RoomReport;
 import app.neuland.model.roomreport.RoomReportCategory;
+import app.neuland.model.auditlog.AuditLogEntry;
+import app.neuland.model.auditlog.AuditLogOperation;
+import app.neuland.ports.inbound.AuditLogUseCase;
 import app.neuland.ports.outbound.RoomReportRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,10 +17,13 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -26,11 +32,14 @@ class RoomReportServiceTest {
     @Mock
     RoomReportRepository roomReportRepository;
 
+    @Mock
+    AuditLogUseCase auditLogUseCase;
+
     private RoomReportService service;
 
     @BeforeEach
     void setUp() {
-        service = new RoomReportService(roomReportRepository);
+        service = new RoomReportService(roomReportRepository, auditLogUseCase);
     }
 
     @Test
@@ -66,6 +75,7 @@ class RoomReportServiceTest {
                         && report.description().equals("gone")
                         && report.resolvedAt() == null
         ));
+        verifyNoInteractions(auditLogUseCase);
     }
 
     @Test
@@ -75,7 +85,7 @@ class RoomReportServiceTest {
         ));
         when(roomReportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Long id = service.resolve(3L, true);
+        Long id = service.resolve(3L, true, "user-1");
 
         assertEquals(3L, id);
         verify(roomReportRepository).save(argThat(report ->
@@ -83,6 +93,7 @@ class RoomReportServiceTest {
                         && report.reason() == RoomReportCategory.MISSING
                         && report.resolvedAt() != null
         ));
+        assertAuditLog(3L, "A101", "user-1");
     }
 
     @Test
@@ -92,12 +103,13 @@ class RoomReportServiceTest {
         ));
         when(roomReportRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Long id = service.resolve(4L, false);
+        Long id = service.resolve(4L, false, "user-2");
 
         assertEquals(4L, id);
         verify(roomReportRepository).save(argThat(report ->
                 report.id().equals(4L) && report.resolvedAt() == null
         ));
+        assertAuditLog(4L, "A101", "user-2");
     }
 
     @Test
@@ -106,9 +118,22 @@ class RoomReportServiceTest {
 
         RoomReportNotFoundException exception = assertThrows(
                 RoomReportNotFoundException.class,
-                () -> service.resolve(99L, true)
+                () -> service.resolve(99L, true, "user-1")
         );
 
         assertEquals("Room report not found: 99", exception.getMessage());
+    }
+
+    private void assertAuditLog(Long entityId, String name, String userId) {
+        var auditLog = forClass(AuditLogEntry.class);
+        verify(auditLogUseCase).append(auditLog.capture());
+
+        AuditLogEntry entry = auditLog.getValue();
+        assertEquals("RoomReport", entry.entity());
+        assertEquals(entityId, entry.entityId());
+        assertEquals(AuditLogOperation.UPDATE, entry.operation());
+        assertEquals(name, entry.name());
+        assertEquals(userId, entry.userId());
+        assertNotNull(entry.occurredAt());
     }
 }

@@ -1,6 +1,9 @@
 package app.neuland.implementation.roomreports;
 
+import app.neuland.model.auditlog.AuditLogEntry;
+import app.neuland.model.auditlog.AuditLogOperation;
 import app.neuland.model.roomreport.RoomReport;
+import app.neuland.ports.inbound.AuditLogUseCase;
 import app.neuland.ports.inbound.RoomReportUseCase;
 import app.neuland.ports.outbound.RoomReportRepository;
 
@@ -10,9 +13,11 @@ import java.util.List;
 public class RoomReportService implements RoomReportUseCase {
 
     private final RoomReportRepository roomReportRepository;
+    private final AuditLogUseCase auditLogUseCase;
 
-    public RoomReportService(RoomReportRepository roomReportRepository) {
+    public RoomReportService(RoomReportRepository roomReportRepository, AuditLogUseCase auditLogUseCase) {
         this.roomReportRepository = roomReportRepository;
+        this.auditLogUseCase = auditLogUseCase;
     }
 
     @Override
@@ -33,7 +38,7 @@ public class RoomReportService implements RoomReportUseCase {
     }
 
     @Override
-    public Long resolve(long id, boolean resolved) {
+    public Long resolve(long id, boolean resolved, String userId) {
         RoomReport existing = roomReportRepository
                 .findById(id)
                 .orElseThrow(() -> new RoomReportNotFoundException(id));
@@ -49,6 +54,28 @@ public class RoomReportService implements RoomReportUseCase {
                 existing.description(),
                 resolvedAt
         );
-        return roomReportRepository.save(updated).id();
+
+        RoomReport saved = roomReportRepository.save(updated);
+
+        appendAuditLog(saved, AuditLogOperation.UPDATE, userId);
+
+        return saved.id();
+    }
+
+    private void appendAuditLog(
+            RoomReport roomReport,
+            AuditLogOperation operation,
+            String userId) {
+        auditLogUseCase.append(
+                new AuditLogEntry(
+                        null,
+                        "RoomReport",
+                        roomReport.id(),
+                        operation,
+                        roomReport.room(),
+                        userId,
+                        Instant.now()
+                )
+        );
     }
 }

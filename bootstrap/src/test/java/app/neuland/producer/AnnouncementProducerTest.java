@@ -2,6 +2,7 @@ package app.neuland.producer;
 
 import app.neuland.implementation.announcements.AnnouncementService;
 import app.neuland.ports.inbound.AnnouncementUseCase;
+import app.neuland.ports.inbound.AuditLogUseCase;
 import app.neuland.ports.outbound.AnnouncementRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,9 +17,13 @@ class AnnouncementProducerTest {
     @Mock
     AnnouncementRepository announcementRepository;
 
+    @Mock
+    AuditLogUseCase auditLogUseCase;
+
     @Test
     void shouldProduceAnnouncementService() {
-        AnnouncementUseCase useCase = new AnnouncementProducer().announcementUseCase(announcementRepository);
+        AnnouncementUseCase useCase = new AnnouncementProducer()
+                .announcementUseCase(announcementRepository, auditLogUseCase);
 
         assertInstanceOf(AnnouncementService.class, useCase);
     }

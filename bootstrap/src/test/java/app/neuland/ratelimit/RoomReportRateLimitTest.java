@@ -16,6 +16,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @QuarkusTest
@@ -74,7 +75,7 @@ class RoomReportRateLimitTest {
 
     @Test
     void shouldReturn429ForBurstOfResolves() {
-        when(roomReportUseCase.resolve(anyLong(), anyBoolean())).thenReturn(1L);
+        when(roomReportUseCase.resolve(anyLong(), anyBoolean(), anyString())).thenReturn(1L);
 
         for (int i = 0; i < 2; i++) {
             given().auth().oauth2(JwtTestFixture.reportsToken())

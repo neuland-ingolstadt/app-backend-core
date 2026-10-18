@@ -26,6 +26,7 @@ import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -166,7 +167,7 @@ class AnnouncementResourceTest {
 
     @Test
     void shouldCreate() {
-        when(announcementUseCase.create(any())).thenReturn(announcement(7L));
+        when(announcementUseCase.create(any(), anyString())).thenReturn(announcement(7L));
 
         given()
                 .auth()
@@ -215,12 +216,12 @@ class AnnouncementResourceTest {
                 1,
                 URL,
                 IMAGE_URL
-        ));
+        ), "test-user");
     }
 
     @Test
     void shouldCreateWithoutOptionalUrls() {
-        when(announcementUseCase.create(any())).thenReturn(announcement(8L, null, null));
+        when(announcementUseCase.create(any(), anyString())).thenReturn(announcement(8L, null, null));
 
         given()
                 .auth()
@@ -266,7 +267,7 @@ class AnnouncementResourceTest {
                 1,
                 null,
                 null
-        ));
+        ), "test-user");
     }
 
     @Test
@@ -330,7 +331,8 @@ class AnnouncementResourceTest {
 
     @Test
     void shouldUpdate() {
-        when(announcementUseCase.update(anyLong(), any())).thenReturn(announcement(3L, null, null));
+        when(announcementUseCase.update(anyLong(), any(), anyString()))
+                .thenReturn(announcement(3L, null, null));
 
         given()
                 .auth()
@@ -375,7 +377,7 @@ class AnnouncementResourceTest {
                 5,
                 null,
                 null
-        ));
+        ), "test-user");
     }
 
     @Test
@@ -387,7 +389,7 @@ class AnnouncementResourceTest {
                 .then()
                 .statusCode(204);
 
-        verify(announcementUseCase).delete(5L);
+        verify(announcementUseCase).delete(5L, "test-user");
     }
 
     @Test
@@ -412,7 +414,7 @@ class AnnouncementResourceTest {
     void shouldReturnNotFoundOnDelete() {
         doThrow(new AnnouncementNotFoundException(99L))
                 .when(announcementUseCase)
-                .delete(99L);
+                .delete(99L, "test-user");
 
         given()
                 .auth()

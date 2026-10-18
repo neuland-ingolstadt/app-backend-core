@@ -10,21 +10,25 @@ import app.neuland.ports.inbound.UniversitySportsUseCase;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.reactive.RestResponse;
+import io.quarkus.security.identity.SecurityIdentity;
 
 public class UniversitySportsResource implements UniversitySportsApi {
 
     private final UniversitySportsUseCase universitySportsUseCase;
+    private final SecurityIdentity securityIdentity;
 
     @Context
     UriInfo uriInfo;
 
     @Inject
-    public UniversitySportsResource(UniversitySportsUseCase universitySportsUseCase) {
+    public UniversitySportsResource(UniversitySportsUseCase universitySportsUseCase, SecurityIdentity securityIdentity) {
         this.universitySportsUseCase = universitySportsUseCase;
+        this.securityIdentity = securityIdentity;
     }
 
     @Override
@@ -48,9 +52,11 @@ public class UniversitySportsResource implements UniversitySportsApi {
             SecurityRoles.sportRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Sports> createSport(SportsCreateRequest sportsCreateRequest) {
         app.neuland.model.universitysports.Sports created = universitySportsUseCase.create(
-                UniversitySportsMapper.toDomain(sportsCreateRequest)
+                UniversitySportsMapper.toDomain(sportsCreateRequest),
+                securityIdentity.getPrincipal().getName()
         );
         return RestResponse.ResponseBuilder
                 .create(
@@ -68,11 +74,13 @@ public class UniversitySportsResource implements UniversitySportsApi {
             SecurityRoles.sportRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Sports> updateSport(Long sportsId, SportsPatchRequest sportsPatchRequest) {
         return RestResponse.ok(
                 UniversitySportsMapper.toResponse(universitySportsUseCase.update(
                         sportsId,
-                        UniversitySportsMapper.toDomain(sportsId, sportsPatchRequest)
+                        UniversitySportsMapper.toDomain(sportsId, sportsPatchRequest),
+                        securityIdentity.getPrincipal().getName()
                 ))
         );
     }
@@ -82,8 +90,9 @@ public class UniversitySportsResource implements UniversitySportsApi {
             SecurityRoles.sportRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Void> deleteSport(Long sportsId) {
-        universitySportsUseCase.delete(sportsId);
+        universitySportsUseCase.delete(sportsId, securityIdentity.getPrincipal().getName());
         return RestResponse.noContent();
     }
 }
