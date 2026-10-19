@@ -10,9 +10,9 @@ public interface AnnouncementUseCase {
 
     Announcement get(long id);
 
-    Announcement create(Announcement announcement);
+    Announcement create(Announcement announcement, String userId);
 
-    Announcement update(long id, Announcement announcement);
+    Announcement update(long id, Announcement announcement, String userId);
 
-    void delete(long id);
+    void delete(long id, String userId);
 }

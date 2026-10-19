@@ -8,5 +8,5 @@ public interface RoomReportUseCase {
 
     Long create(RoomReport report);
 
-    Long resolve(long id, boolean resolved);
+    Long resolve(long id, boolean resolved, String userId);
 }

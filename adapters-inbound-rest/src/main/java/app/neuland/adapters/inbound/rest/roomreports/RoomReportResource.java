@@ -10,23 +10,28 @@ import app.neuland.ports.inbound.RoomReportUseCase;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.UriInfo;
 import org.jboss.resteasy.reactive.RestResponse;
+
+import io.quarkus.security.identity.SecurityIdentity;
 import io.smallrye.faulttolerance.api.RateLimit;
 import java.time.temporal.ChronoUnit;
 
 public class RoomReportResource implements RoomReportsApi {
 
     private final RoomReportUseCase roomReportUseCase;
+    private final SecurityIdentity securityIdentity;
 
     @Context
     UriInfo uriInfo;
 
     @Inject
-    public RoomReportResource(RoomReportUseCase roomReportUseCase) {
+    public RoomReportResource(RoomReportUseCase roomReportUseCase, SecurityIdentity securityIdentity) {
         this.roomReportUseCase = roomReportUseCase;
+        this.securityIdentity = securityIdentity;
     }
 
     @Override
@@ -65,13 +70,15 @@ public class RoomReportResource implements RoomReportsApi {
             SecurityRoles.adminRole
     })
     @RateLimit(value = 100, window = 1, windowUnit = ChronoUnit.MINUTES)
+    @Transactional
     public RestResponse<RoomReportResponse> resolveRoomReport(
             Long roomReportId,
             RoomReportPatchRequest roomReportPatchRequest
     ) {
         Long id = roomReportUseCase.resolve(
                 roomReportId,
-                roomReportPatchRequest.getResolved()
+                roomReportPatchRequest.getResolved(),
+                securityIdentity.getPrincipal().getName()
         );
 
         return RestResponse.ok(RoomReportMapper.toIdResponse(id));

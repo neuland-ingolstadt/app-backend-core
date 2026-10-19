@@ -4,6 +4,9 @@ import app.neuland.model.universitysports.Campus;
 import app.neuland.model.universitysports.Sports;
 import app.neuland.model.universitysports.SportsCategory;
 import app.neuland.model.universitysports.Weekday;
+import app.neuland.model.auditlog.AuditLogEntry;
+import app.neuland.model.auditlog.AuditLogOperation;
+import app.neuland.ports.inbound.AuditLogUseCase;
 import app.neuland.ports.outbound.UniversitySportsRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -18,8 +21,10 @@ import java.util.Optional;
 import static app.neuland.model.universitysports.SportsFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
@@ -32,11 +37,14 @@ class UniversitySportsServiceTest {
     @Mock
     UniversitySportsRepository universitySportsRepository;
 
+    @Mock
+    AuditLogUseCase auditLogUseCase;
+
     private UniversitySportsService service;
 
     @BeforeEach
     void setUp() {
-        service = new UniversitySportsService(universitySportsRepository);
+        service = new UniversitySportsService(universitySportsRepository, auditLogUseCase);
     }
 
     @Test
@@ -74,10 +82,11 @@ class UniversitySportsServiceTest {
             return sample(7L, sport.weekday(), sport.sportsCategory());
         });
 
-        Sports created = service.create(input);
+        Sports created = service.create(input, "user-1");
 
         assertEquals(7L, created.id());
         verify(universitySportsRepository).save(argThat(sport -> sport.id() == null));
+        assertAuditLog(AuditLogOperation.CREATE, 7L, "Titel", "user-1");
     }
 
     @Test
@@ -87,11 +96,12 @@ class UniversitySportsServiceTest {
         when(universitySportsRepository.findById(8L)).thenReturn(Optional.of(existing));
         when(universitySportsRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Sports result = service.update(8L, update);
+        Sports result = service.update(8L, update, "user-2");
 
         assertEquals(8L, result.id());
         assertEquals(Weekday.FRIDAY, result.weekday());
         assertEquals(SportsCategory.YOGA, result.sportsCategory());
+        assertAuditLog(AuditLogOperation.UPDATE, 8L, "Titel", "user-2");
     }
 
     @Test
@@ -100,7 +110,7 @@ class UniversitySportsServiceTest {
 
         assertThrows(
                 SportsNotFoundException.class,
-                () -> service.update(99L, sample(null, Weekday.SATURDAY, SportsCategory.OTHER))
+                () -> service.update(99L, sample(null, Weekday.SATURDAY, SportsCategory.OTHER), "user-1")
         );
     }
 
@@ -109,16 +119,17 @@ class UniversitySportsServiceTest {
         when(universitySportsRepository.findById(9L))
                 .thenReturn(Optional.of(sample(9L, Weekday.SUNDAY, SportsCategory.SWIMMING)));
 
-        service.delete(9L);
+        service.delete(9L, "user-3");
 
         verify(universitySportsRepository).deleteById(eq(9L));
+        assertAuditLog(AuditLogOperation.DELETE, 9L, "Titel", "user-3");
     }
 
     @Test
     void shouldThrowWhenDeletingMissing() {
         when(universitySportsRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(SportsNotFoundException.class, () -> service.delete(99L));
+        assertThrows(SportsNotFoundException.class, () -> service.delete(99L, "user-1"));
     }
 
     @Test
@@ -138,5 +149,23 @@ class UniversitySportsServiceTest {
         );
 
         assertNull(sport.contents());
+    }
+
+    private void assertAuditLog(
+            AuditLogOperation operation,
+            Long entityId,
+            String name,
+            String userId
+    ) {
+        var auditLog = forClass(AuditLogEntry.class);
+        verify(auditLogUseCase).append(auditLog.capture());
+
+        AuditLogEntry entry = auditLog.getValue();
+        assertEquals("Sports", entry.entity());
+        assertEquals(entityId, entry.entityId());
+        assertEquals(operation, entry.operation());
+        assertEquals(name, entry.name());
+        assertEquals(userId, entry.userId());
+        assertNotNull(entry.occurredAt());
     }
 }

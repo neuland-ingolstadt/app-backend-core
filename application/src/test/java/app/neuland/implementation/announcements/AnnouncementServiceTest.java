@@ -4,7 +4,10 @@ import app.neuland.model.announcement.Announcement;
 import app.neuland.model.announcement.AnnouncementContent;
 import app.neuland.model.announcement.Platform;
 import app.neuland.model.announcement.UserKind;
+import app.neuland.model.auditlog.AuditLogEntry;
+import app.neuland.model.auditlog.AuditLogOperation;
 import app.neuland.model.shared.Language;
+import app.neuland.ports.inbound.AuditLogUseCase;
 import app.neuland.ports.outbound.AnnouncementRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,11 +24,13 @@ import java.util.Set;
 import static app.neuland.model.announcement.AnnouncementFixtures.sample;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentCaptor.forClass;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -35,11 +40,14 @@ class AnnouncementServiceTest {
     @Mock
     AnnouncementRepository announcementRepository;
 
+    @Mock
+    AuditLogUseCase auditLogUseCase;
+
     private AnnouncementService service;
 
     @BeforeEach
     void setUp() {
-        service = new AnnouncementService(announcementRepository);
+        service = new AnnouncementService(announcementRepository, auditLogUseCase);
     }
 
     @Test
@@ -85,7 +93,9 @@ class AnnouncementServiceTest {
         Announcement saved = sample(4L);
         when(announcementRepository.save(input)).thenReturn(saved);
 
-        assertEquals(saved, service.create(input));
+        assertEquals(saved, service.create(input, "user-1"));
+
+        assertAuditLog(AuditLogOperation.CREATE, 4L, "Titel", "user-1");
     }
 
     @Test
@@ -105,35 +115,58 @@ class AnnouncementServiceTest {
         when(announcementRepository.findById(5L)).thenReturn(Optional.of(existing));
         when(announcementRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Announcement result = service.update(5L, update);
+        Announcement result = service.update(5L, update, "user-2");
 
         assertEquals(5L, result.id());
         assertEquals(Set.of(Platform.WEB, Platform.WEB_DEV), result.platforms());
         assertEquals(Set.of(UserKind.EMPLOYEE), result.userKinds());
         assertEquals(2, result.priority());
         verify(announcementRepository).save(argThat(announcement -> announcement.id().equals(5L)));
+        assertAuditLog(AuditLogOperation.UPDATE, 5L, "Title EN", "user-2");
     }
 
     @Test
     void shouldThrowWhenUpdatingMissing() {
         when(announcementRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(AnnouncementNotFoundException.class, () -> service.update(99L, sample(null)));
+        assertThrows(
+                AnnouncementNotFoundException.class,
+                () -> service.update(99L, sample(null), "user-1")
+        );
     }
 
     @Test
     void shouldDelete() {
         when(announcementRepository.findById(6L)).thenReturn(Optional.of(sample(6L)));
 
-        service.delete(6L);
+        service.delete(6L, "user-3");
 
         verify(announcementRepository).deleteById(eq(6L));
+        assertAuditLog(AuditLogOperation.DELETE, 6L, "Titel", "user-3");
     }
 
     @Test
     void shouldThrowWhenDeletingMissing() {
         when(announcementRepository.findById(anyLong())).thenReturn(Optional.empty());
 
-        assertThrows(AnnouncementNotFoundException.class, () -> service.delete(99L));
+        assertThrows(AnnouncementNotFoundException.class, () -> service.delete(99L, "user-1"));
+    }
+
+    private void assertAuditLog(
+            AuditLogOperation operation,
+            Long entityId,
+            String name,
+            String userId
+    ) {
+        var auditLog = forClass(AuditLogEntry.class);
+        verify(auditLogUseCase).append(auditLog.capture());
+
+        AuditLogEntry entry = auditLog.getValue();
+        assertEquals("Announcement", entry.entity());
+        assertEquals(entityId, entry.entityId());
+        assertEquals(operation, entry.operation());
+        assertEquals(name, entry.name());
+        assertEquals(userId, entry.userId());
+        assertNotNull(entry.occurredAt());
     }
 }

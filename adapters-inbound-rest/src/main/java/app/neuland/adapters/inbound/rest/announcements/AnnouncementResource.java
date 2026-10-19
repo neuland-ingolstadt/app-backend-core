@@ -11,6 +11,7 @@ import io.quarkus.security.identity.SecurityIdentity;
 import jakarta.annotation.security.PermitAll;
 import jakarta.annotation.security.RolesAllowed;
 import jakarta.inject.Inject;
+import jakarta.transaction.Transactional;
 import jakarta.ws.rs.ForbiddenException;
 import jakarta.ws.rs.NotAuthorizedException;
 import jakarta.ws.rs.core.Context;
@@ -70,11 +71,13 @@ public class AnnouncementResource implements AnnouncementsApi {
             SecurityRoles.announcementRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Announcement> createAnnouncement(
             AnnouncementCreateRequest announcementCreateRequest
     ) {
         app.neuland.model.announcement.Announcement created = announcementUseCase.create(
-                AnnouncementMapper.toDomain(announcementCreateRequest)
+                AnnouncementMapper.toDomain(announcementCreateRequest),
+                securityIdentity.getPrincipal().getName()
         );
 
         return RestResponse.ResponseBuilder
@@ -93,6 +96,7 @@ public class AnnouncementResource implements AnnouncementsApi {
             SecurityRoles.announcementRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Announcement> updateAnnouncement(
             Long announcementId,
             AnnouncementPatchRequest announcementPatchRequest
@@ -104,7 +108,8 @@ public class AnnouncementResource implements AnnouncementsApi {
                                 AnnouncementMapper.toDomain(
                                         announcementId,
                                         announcementPatchRequest
-                                )
+                                ),
+                                securityIdentity.getPrincipal().getName()
                         )
                 )
         );
@@ -115,8 +120,9 @@ public class AnnouncementResource implements AnnouncementsApi {
             SecurityRoles.announcementRole,
             SecurityRoles.adminRole
     })
+    @Transactional
     public RestResponse<Void> deleteAnnouncement(Long announcementId) {
-        announcementUseCase.delete(announcementId);
+        announcementUseCase.delete(announcementId, securityIdentity.getPrincipal().getName());
         return RestResponse.noContent();
     }
 }

@@ -21,6 +21,7 @@ import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.Matchers.hasKey;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -158,7 +159,7 @@ class RoomReportResourceTest {
 
     @Test
     void shouldResolve() {
-        when(roomReportUseCase.resolve(anyLong(), any(Boolean.class))).thenReturn(3L);
+        when(roomReportUseCase.resolve(anyLong(), any(Boolean.class), anyString())).thenReturn(3L);
 
         given()
                 .auth()
@@ -174,7 +175,7 @@ class RoomReportResourceTest {
                 .statusCode(200)
                 .body("id", is(3));
 
-        verify(roomReportUseCase).resolve(3L, true);
+        verify(roomReportUseCase).resolve(3L, true, "test-user");
     }
 
     @Test
@@ -194,7 +195,7 @@ class RoomReportResourceTest {
 
     @Test
     void shouldReturnNotFound() {
-        when(roomReportUseCase.resolve(anyLong(), any(Boolean.class)))
+        when(roomReportUseCase.resolve(anyLong(), any(Boolean.class), anyString()))
                 .thenThrow(new RoomReportNotFoundException(99L));
 
         given()

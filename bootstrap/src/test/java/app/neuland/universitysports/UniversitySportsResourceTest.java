@@ -24,6 +24,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -103,7 +104,7 @@ class UniversitySportsResourceTest {
 
     @Test
     void shouldCreate() {
-        when(universitySportsUseCase.create(any())).thenReturn(sports(7L));
+        when(universitySportsUseCase.create(any(), anyString())).thenReturn(sports(7L));
 
         given()
                 .auth()
@@ -156,12 +157,13 @@ class UniversitySportsResourceTest {
                 INVITATION_LINK,
                 EMAIL,
                 SportsCategory.BASKETBALL
-        ));
+        ), "test-user");
     }
 
     @Test
     void shouldCreateWithoutOptionalFields() {
-        when(universitySportsUseCase.create(any())).thenReturn(sports(8L, null, null, null));
+        when(universitySportsUseCase.create(any(), anyString()))
+                .thenReturn(sports(8L, null, null, null));
 
         given()
                 .auth()
@@ -211,7 +213,7 @@ class UniversitySportsResourceTest {
                 null,
                 null,
                 SportsCategory.BASKETBALL
-        ));
+        ), "test-user");
     }
 
     @Test
@@ -277,7 +279,8 @@ class UniversitySportsResourceTest {
 
     @Test
     void shouldUpdate() {
-        when(universitySportsUseCase.update(anyLong(), any())).thenReturn(sports(3L, null, null, null));
+        when(universitySportsUseCase.update(anyLong(), any(), anyString()))
+                .thenReturn(sports(3L, null, null, null));
 
         given()
                 .auth()
@@ -324,7 +327,7 @@ class UniversitySportsResourceTest {
                 null,
                 null,
                 SportsCategory.VOLLEYBALL
-        ));
+        ), "test-user");
     }
 
     @Test
@@ -336,7 +339,7 @@ class UniversitySportsResourceTest {
                 .then()
                 .statusCode(204);
 
-        verify(universitySportsUseCase).delete(5L);
+        verify(universitySportsUseCase).delete(5L, "test-user");
     }
 
     @Test
@@ -359,7 +362,7 @@ class UniversitySportsResourceTest {
     void shouldReturnNotFoundOnDelete() {
         doThrow(new SportsNotFoundException(99L))
                 .when(universitySportsUseCase)
-                .delete(99L);
+                .delete(99L, "test-user");
 
         given()
                 .auth()
@@ -498,4 +501,3 @@ class UniversitySportsResourceTest {
         );
     }
 }
-
