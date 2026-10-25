@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 @ApplicationScoped
 public class ThiNewsClientAdapter implements ThiNewsClient {
 
-    private static final Pattern SRCSET_ENTRY = Pattern.compile("(\\S+)\\s+(\\d+)w");
+    private static final Pattern SRCSET_ENTRY = Pattern.compile("(\\S++)\\s++(\\d++)w");
     private static final int PREFERRED_IMAGE_WIDTH = 1100;
 
     private final String pressUrl;
