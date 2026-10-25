@@ -1,15 +1,24 @@
 package app.neuland.adapters.outbound.http.thinews;
 
 import app.neuland.model.thinews.ThiNewsItem;
+import com.sun.net.httpserver.HttpServer;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.junit.jupiter.api.Test;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
+import java.net.InetSocketAddress;
+import java.nio.charset.StandardCharsets;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.concurrent.Executors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ThiNewsClientAdapterTest {
 
@@ -58,6 +67,38 @@ class ThiNewsClientAdapterTest {
     }
 
     @Test
+    void shouldSkipArticlesWithoutLink() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <span itemprop="headline">No link</span>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        assertEquals(List.of(), adapter.parse(document));
+    }
+
+    @Test
+    void shouldSkipArticlesWithBlankDatetimeAttribute() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="   ">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="Blank date" href="/news/blank-date/">
+                    <span itemprop="headline">Blank date</span>
+                  </a>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        assertEquals(List.of(), adapter.parse(document));
+    }
+
+    @Test
     void shouldAllowMissingImage() {
         Document document = Jsoup.parse(
                 """
@@ -76,6 +117,24 @@ class ThiNewsClientAdapterTest {
         assertEquals(1, news.size());
         assertNull(news.getFirst().imageUrl());
         assertEquals("Description without image", news.getFirst().description());
+    }
+
+    @Test
+    void shouldTreatWhitespaceOnlyDescriptionAsEmpty() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="Whitespace description" href="/news/ws/">
+                    <span itemprop="headline">Whitespace description</span>
+                  </a>
+                  <p class="c-news-teaser__text">   </p>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        assertEquals("", adapter.parse(document).getFirst().description());
     }
 
     @Test
@@ -125,6 +184,159 @@ class ThiNewsClientAdapterTest {
         List<ThiNewsItem> news = customOrigin.parse(document);
         assertEquals(1, news.size());
         assertEquals("https://presse.example/news/mirror/", news.getFirst().url());
+    }
+
+    @Test
+    void shouldResolveAbsoluteAndPathRelativeHrefs() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="Absolute"
+                     href="http://cdn.example/news/abs/">
+                    <span itemprop="headline">Absolute</span>
+                  </a>
+                </article>
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-02T10:00:00+02:00">02.10.2026</time>
+                  <a class="c-news-teaser__link" title="Https absolute"
+                     href="https://cdn.example/news/https/">
+                    <span itemprop="headline">Https absolute</span>
+                  </a>
+                </article>
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-03T10:00:00+02:00">03.10.2026</time>
+                  <a class="c-news-teaser__link" title="Relative path" href="news/rel/">
+                    <span itemprop="headline">Relative path</span>
+                  </a>
+                </article>
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-04T10:00:00+02:00">04.10.2026</time>
+                  <a class="c-news-teaser__link" title="Blank href" href="  ">
+                    <span itemprop="headline">Blank href</span>
+                  </a>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        List<ThiNewsItem> news = adapter.parse(document);
+        assertEquals(4, news.size());
+        assertEquals("http://cdn.example/news/abs/", news.get(0).url());
+        assertEquals("https://cdn.example/news/https/", news.get(1).url());
+        assertEquals("https://www.thi.de/news/rel/", news.get(2).url());
+        assertNull(news.get(3).url());
+    }
+
+    @Test
+    void shouldFallBackToFirstSourceWhenNoDesktopMedia() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="Mobile only" href="/news/mobile/">
+                    <span itemprop="headline">Mobile only</span>
+                  </a>
+                  <picture class="c-news-teaser__media">
+                    <source data-srcset="/img-400.webp 400w, /img-1100.webp 1100w" />
+                  </picture>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        assertEquals("https://www.thi.de/img-1100.webp", adapter.parse(document).getFirst().imageUrl());
+    }
+
+    @Test
+    void shouldIgnoreBlankOrUnmatchedSrcset() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="Blank srcset" href="/news/blank-srcset/">
+                    <span itemprop="headline">Blank srcset</span>
+                  </a>
+                  <picture class="c-news-teaser__media">
+                    <source data-srcset="   " media="(min-width: 768px)" />
+                  </picture>
+                </article>
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-02T10:00:00+02:00">02.10.2026</time>
+                  <a class="c-news-teaser__link" title="Bad srcset" href="/news/bad-srcset/">
+                    <span itemprop="headline">Bad srcset</span>
+                  </a>
+                  <picture class="c-news-teaser__media">
+                    <source data-srcset="/img.webp" media="(min-width: 768px)" />
+                  </picture>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        List<ThiNewsItem> news = adapter.parse(document);
+        assertEquals(2, news.size());
+        assertNull(news.get(0).imageUrl());
+        assertNull(news.get(1).imageUrl());
+    }
+
+    @Test
+    void shouldFallBackToLinkTitleWhenHeadlineMissing() {
+        Document document = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" title="From title attr" href="/news/title-attr/"></a>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
+
+        assertEquals("From title attr", adapter.parse(document).getFirst().title());
+    }
+
+    @Test
+    void shouldRejectNonAbsolutePressUrl() {
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ThiNewsClientAdapter("/relative/presse/", 1000)
+        );
+    }
+
+    @Test
+    void shouldFetchAndParseFromHttpEndpoint() throws IOException {
+        HttpServer server = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+        server.createContext("/presse/", exchange -> {
+            byte[] body = SAMPLE_HTML.getBytes(StandardCharsets.UTF_8);
+            exchange.getResponseHeaders().add("Content-Type", "text/html; charset=utf-8");
+            exchange.sendResponseHeaders(200, body.length);
+            try (OutputStream os = exchange.getResponseBody()) {
+                os.write(body);
+            }
+        });
+        server.setExecutor(Executors.newSingleThreadExecutor());
+        server.start();
+
+        try {
+            String pressUrl = "http://127.0.0.1:" + server.getAddress().getPort() + "/presse/";
+            ThiNewsClientAdapter httpAdapter = new ThiNewsClientAdapter(pressUrl, 2000);
+
+            List<ThiNewsItem> news = httpAdapter.fetchAll();
+
+            assertEquals(1, news.size());
+            assertEquals("Körpergefühl und Kopfsache", news.getFirst().title());
+            assertTrue(news.getFirst().url().startsWith("http://127.0.0.1:"));
+        } finally {
+            server.stop(0);
+        }
+    }
+
+    @Test
+    void shouldWrapFetchFailures() {
+        ThiNewsClientAdapter unreachable = new ThiNewsClientAdapter("http://127.0.0.1:1/", 200);
+
+        UncheckedIOException error = assertThrows(UncheckedIOException.class, unreachable::fetchAll);
+        assertTrue(error.getMessage().contains("Failed to fetch THI press releases"));
     }
 
     private static final String SAMPLE_HTML = """
