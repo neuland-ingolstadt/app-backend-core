@@ -267,7 +267,7 @@ class ThiNewsClientAdapterTest {
                     <span itemprop="headline">Bad srcset</span>
                   </a>
                   <picture class="c-news-teaser__media">
-                    <source data-srcset="/img.webp" media="(min-width: 768px)" />
+                    <source data-srcset="/img.webp, /img.webp abcw" media="(min-width: 768px)" />
                   </picture>
                 </article>
                 """,

@@ -19,13 +19,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @ApplicationScoped
 public class ThiNewsClientAdapter implements ThiNewsClient {
 
-    private static final Pattern SRCSET_ENTRY = Pattern.compile("(\\S++)\\s++(\\d++)w");
     private static final int PREFERRED_IMAGE_WIDTH = 1100;
 
     private final String pressUrl;
@@ -147,9 +144,8 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         }
 
         List<SrcsetCandidate> candidates = new ArrayList<>();
-        Matcher matcher = SRCSET_ENTRY.matcher(srcset);
-        while (matcher.find()) {
-            candidates.add(new SrcsetCandidate(matcher.group(1), Integer.parseInt(matcher.group(2))));
+        for (String part : srcset.split(",")) {
+            parseSrcsetEntry(part.trim()).ifPresent(candidates::add);
         }
         if (candidates.isEmpty()) {
             return Optional.empty();
@@ -158,6 +154,30 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         return candidates.stream()
                 .min(Comparator.comparingInt(c -> Math.abs(c.width() - PREFERRED_IMAGE_WIDTH)))
                 .map(SrcsetCandidate::url);
+    }
+
+    private static Optional<SrcsetCandidate> parseSrcsetEntry(String entry) {
+        if (entry.isEmpty()) {
+            return Optional.empty();
+        }
+
+        int separator = entry.lastIndexOf(' ');
+        if (separator <= 0 || separator == entry.length() - 1) {
+            return Optional.empty();
+        }
+
+        String url = entry.substring(0, separator).trim();
+        String descriptor = entry.substring(separator + 1).trim();
+        if (url.isEmpty() || descriptor.length() < 2 || descriptor.charAt(descriptor.length() - 1) != 'w') {
+            return Optional.empty();
+        }
+
+        try {
+            int width = Integer.parseInt(descriptor, 0, descriptor.length() - 1, 10);
+            return Optional.of(new SrcsetCandidate(url, width));
+        } catch (NumberFormatException e) {
+            return Optional.empty();
+        }
     }
 
     private String toAbsoluteUrl(String href) {
