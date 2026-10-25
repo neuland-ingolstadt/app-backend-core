@@ -8,6 +8,7 @@
 
     <modules>
         <module>adapters-inbound-rest</module>
+        <module>adapters-outbound-http</module>
         <module>adapters-outbound-persistence</module>
         <module>application</module>
         <module>bootstrap</module>
@@ -23,7 +24,7 @@
         <quarkus.platform.artifact-id>quarkus-bom</quarkus.platform.artifact-id>
         <quarkus.platform.group-id>io.quarkus.platform</quarkus.platform.group-id>
         <quarkus.platform.version>3.40.1</quarkus.platform.version>
-        <backend-core-api.version>1.1.1</backend-core-api.version>
+        <backend-core-api.version>1.2.0</backend-core-api.version>
         <surefire-plugin.version>3.6.0</surefire-plugin.version>
         <jacoco.version>0.8.15</jacoco.version>
         <sonar.organization>neuland-ingolstadt</sonar.organization>
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>app.neuland</groupId>
                 <artifactId>adapters-inbound-rest</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>app.neuland</groupId>
+                <artifactId>adapters-outbound-http</artifactId>
                 <version>${project.version}</version>
             </dependency>
             <dependency>
