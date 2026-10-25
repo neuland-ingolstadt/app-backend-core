@@ -11,7 +11,7 @@ import java.io.OutputStream;
 import java.io.UncheckedIOException;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 import java.util.concurrent.Executors;
 
@@ -40,7 +40,7 @@ class ThiNewsClientAdapterTest {
                 "Yoga, Pilates und eine Auszeit vom Hochschulalltag: Beim Campus Balance Day…",
                 item.description()
         );
-        assertEquals(OffsetDateTime.parse("2026-10-14T14:10:17+02:00"), item.date());
+        assertEquals(Instant.parse("2026-10-14T12:10:17Z"), item.date());
         assertEquals(
                 "https://www.thi.de/fileadmin/_processed_/image-enhancer/74675/image-1100x733.webp",
                 item.imageUrl()

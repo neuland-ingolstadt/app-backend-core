@@ -13,6 +13,7 @@ import org.jsoup.select.Elements;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.net.URI;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -30,11 +31,8 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
     private final int timeoutMillis;
 
     public ThiNewsClientAdapter(
-            @ConfigProperty(
-                    name = "thi.news.url",
-                    defaultValue = "https://www.thi.de/hochschule/aktuelles/presse/"
-            ) String pressUrl,
-            @ConfigProperty(name = "thi.news.timeout-ms", defaultValue = "10000") int timeoutMillis
+            @ConfigProperty(name = "thi.news.url") String pressUrl,
+            @ConfigProperty(name = "thi.news.timeout-ms") int timeoutMillis
     ) {
         this.pressUrl = pressUrl;
         this.baseUrl = originOf(pressUrl);
@@ -86,7 +84,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
                     .filter(value -> !value.isBlank())
                     .orElse("");
 
-            OffsetDateTime date = parseDate(article).orElse(null);
+            Instant date = parseDate(article).orElse(null);
             if (date == null) {
                 return Optional.empty();
             }
@@ -101,7 +99,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         }
     }
 
-    private Optional<OffsetDateTime> parseDate(Element article) {
+    private Optional<Instant> parseDate(Element article) {
         String datetime = Optional.ofNullable(article.selectFirst("time[itemprop=datePublished]"))
                 .map(time -> time.attr("datetime"))
                 .filter(value -> !value.isBlank())
@@ -110,7 +108,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
             return Optional.empty();
         }
         try {
-            return Optional.of(OffsetDateTime.parse(datetime));
+            return Optional.of(OffsetDateTime.parse(datetime).toInstant());
         } catch (DateTimeParseException e) {
             return Optional.empty();
         }

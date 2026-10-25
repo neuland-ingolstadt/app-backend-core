@@ -4,6 +4,7 @@ import app.neuland.backend.core.api.v0.model.ThiNewsListResponse;
 import app.neuland.model.thinews.ThiNewsItem;
 import org.junit.jupiter.api.Test;
 
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -22,7 +23,7 @@ class ThiNewsMapperTest {
                 new ThiNewsItem(
                         "Title",
                         "Description",
-                        OffsetDateTime.parse("2026-10-14T14:10:17+02:00"),
+                        Instant.parse("2026-10-14T12:10:17Z"),
                         "https://www.thi.de/image.webp",
                         "https://www.thi.de/news/title/"
                 )
@@ -58,7 +59,7 @@ class ThiNewsMapperTest {
         var item = ThiNewsMapper.toResponse(new ThiNewsItem(
                 "Title",
                 "Description",
-                OffsetDateTime.parse("2026-10-01T10:00:00Z"),
+                Instant.parse("2026-10-01T10:00:00Z"),
                 "http://[invalid",
                 "not a uri"
         ));

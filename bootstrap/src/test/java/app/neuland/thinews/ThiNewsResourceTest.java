@@ -6,7 +6,7 @@ import io.quarkus.test.InjectMock;
 import io.quarkus.test.junit.QuarkusTest;
 import org.junit.jupiter.api.Test;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static io.restassured.RestAssured.given;
@@ -26,14 +26,14 @@ class ThiNewsResourceTest {
                 new ThiNewsItem(
                         "Körpergefühl und Kopfsache",
                         "Yoga, Pilates und eine Auszeit vom Hochschulalltag…",
-                        OffsetDateTime.parse("2026-10-14T14:10:17+02:00"),
+                        Instant.parse("2026-10-14T12:10:17Z"),
                         "https://www.thi.de/image.webp",
                         "https://www.thi.de/hochschule/aktuelles/news/koerpergefuehl-und-kopfsache/"
                 ),
                 new ThiNewsItem(
                         "Without image",
                         "Description only",
-                        OffsetDateTime.parse("2026-10-01T10:00:00+02:00"),
+                        Instant.parse("2026-10-01T08:00:00Z"),
                         null,
                         "https://www.thi.de/news/without-image/"
                 )

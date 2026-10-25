@@ -8,7 +8,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +34,7 @@ class ThiNewsServiceTest {
                 new ThiNewsItem(
                         "Title",
                         "Description",
-                        OffsetDateTime.parse("2026-10-14T14:10:17+02:00"),
+                        Instant.parse("2026-10-14T12:10:17Z"),
                         "https://www.thi.de/image.webp",
                         "https://www.thi.de/news/title/"
                 )

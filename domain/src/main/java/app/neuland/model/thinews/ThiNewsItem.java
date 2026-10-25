@@ -1,11 +1,11 @@
 package app.neuland.model.thinews;
 
-import java.time.OffsetDateTime;
+import java.time.Instant;
 
 public record ThiNewsItem(
         String title,
         String description,
-        OffsetDateTime date,
+        Instant date,
         String imageUrl,
         String url
 ) {}

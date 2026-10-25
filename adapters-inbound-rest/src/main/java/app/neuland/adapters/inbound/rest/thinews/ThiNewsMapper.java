@@ -4,6 +4,7 @@ import app.neuland.backend.core.api.v0.model.ThiNewsListResponse;
 import app.neuland.model.thinews.ThiNewsItem;
 
 import java.net.URI;
+import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.util.List;
@@ -29,8 +30,8 @@ record ThiNewsMapper() {
         return api;
     }
 
-    private static OffsetDateTime toApiDateTime(OffsetDateTime dateTime) {
-        return dateTime != null ? dateTime.withOffsetSameInstant(ZoneOffset.UTC) : null;
+    private static OffsetDateTime toApiDateTime(Instant dateTime) {
+        return dateTime != null ? dateTime.atOffset(ZoneOffset.UTC) : null;
     }
 
     private static URI toApiUri(String value) {
