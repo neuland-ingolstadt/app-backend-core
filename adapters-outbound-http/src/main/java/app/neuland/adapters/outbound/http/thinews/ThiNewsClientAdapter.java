@@ -63,40 +63,35 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
     }
 
     private Optional<ThiNewsItem> parseArticle(Element article) {
-        try {
-            Element link = article.selectFirst("a.c-news-teaser__link");
-            if (link == null) {
-                return Optional.empty();
-            }
-
-            String title = firstNonBlank(
-                    textOrNull(article.selectFirst("span[itemprop=headline]")),
-                    link.attr("title"),
-                    link.text()
-            );
-            if (title == null || title.isBlank()) {
-                return Optional.empty();
-            }
-
-            String description = Optional.ofNullable(article.selectFirst("p.c-news-teaser__text"))
-                    .map(Element::text)
-                    .map(String::trim)
-                    .filter(value -> !value.isBlank())
-                    .orElse("");
-
-            Instant date = parseDate(article).orElse(null);
-            if (date == null) {
-                return Optional.empty();
-            }
-
-            String absoluteUrl = toAbsoluteUrl(link.attr("href"));
-            String imageUrl = extractImageUrl(article);
-
-            return Optional.of(new ThiNewsItem(title.trim(), description, date, imageUrl, absoluteUrl));
-        } catch (RuntimeException ignored) {
-            // Malformed teaser markup must not fail the whole feed.
+        Element link = article.selectFirst("a.c-news-teaser__link");
+        if (link == null) {
             return Optional.empty();
         }
+
+        String title = firstNonBlank(
+                textOrNull(article.selectFirst("span[itemprop=headline]")),
+                link.attr("title"),
+                link.text()
+        );
+        if (title == null) {
+            return Optional.empty();
+        }
+
+        String description = Optional.ofNullable(article.selectFirst("p.c-news-teaser__text"))
+                .map(Element::text)
+                .map(String::trim)
+                .filter(value -> !value.isBlank())
+                .orElse("");
+
+        Instant date = parseDate(article).orElse(null);
+        if (date == null) {
+            return Optional.empty();
+        }
+
+        String absoluteUrl = toAbsoluteUrl(link.attr("href"));
+        String imageUrl = extractImageUrl(article);
+
+        return Optional.of(new ThiNewsItem(title.trim(), description, date, imageUrl, absoluteUrl));
     }
 
     private Optional<Instant> parseDate(Element article) {
@@ -136,7 +131,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
                 .orElse(null);
     }
 
-    private Optional<String> pickSrcsetUrl(String srcset) {
+    Optional<String> pickSrcsetUrl(String srcset) {
         if (srcset == null || srcset.isBlank()) {
             return Optional.empty();
         }
@@ -154,7 +149,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
                 .map(SrcsetCandidate::url);
     }
 
-    private static Optional<SrcsetCandidate> parseSrcsetEntry(String entry) {
+    static Optional<SrcsetCandidate> parseSrcsetEntry(String entry) {
         if (entry.isEmpty()) {
             return Optional.empty();
         }
@@ -178,7 +173,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         }
     }
 
-    private String toAbsoluteUrl(String href) {
+    String toAbsoluteUrl(String href) {
         if (href == null || href.isBlank()) {
             return null;
         }
@@ -191,7 +186,7 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         return baseUrl + "/" + href;
     }
 
-    private static String originOf(String url) {
+    static String originOf(String url) {
         URI uri = URI.create(url);
         if (uri.getScheme() == null || uri.getAuthority() == null) {
             throw new IllegalArgumentException("thi.news.url must be an absolute http(s) URL: " + url);
@@ -199,11 +194,11 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         return uri.getScheme() + "://" + uri.getAuthority();
     }
 
-    private static String textOrNull(Element element) {
+    static String textOrNull(Element element) {
         return element == null ? null : element.text();
     }
 
-    private static String firstNonBlank(String... values) {
+    static String firstNonBlank(String... values) {
         for (String value : values) {
             if (value != null && !value.isBlank()) {
                 return value;
@@ -212,5 +207,5 @@ public class ThiNewsClientAdapter implements ThiNewsClient {
         return null;
     }
 
-    private record SrcsetCandidate(String url, int width) {}
+    record SrcsetCandidate(String url, int width) {}
 }

@@ -239,6 +239,7 @@ class ThiNewsClientAdapterTest {
                   </a>
                   <picture class="c-news-teaser__media">
                     <source data-srcset="/img-400.webp 400w, /img-1100.webp 1100w" />
+                    <source data-srcset="/img-square-400.webp 400w" />
                   </picture>
                 </article>
                 """,
@@ -267,7 +268,7 @@ class ThiNewsClientAdapterTest {
                     <span itemprop="headline">Bad srcset</span>
                   </a>
                   <picture class="c-news-teaser__media">
-                    <source data-srcset="/img.webp, /img.webp abcw" media="(min-width: 768px)" />
+                    <source data-srcset="/img.webp, , /img.webp abcw, /img.webp w, /img.webp 12x" media="(min-width: 768px)" />
                   </picture>
                 </article>
                 """,
@@ -281,8 +282,8 @@ class ThiNewsClientAdapterTest {
     }
 
     @Test
-    void shouldFallBackToLinkTitleWhenHeadlineMissing() {
-        Document document = Jsoup.parse(
+    void shouldFallBackToLinkTitleAndLinkTextWhenHeadlineMissing() {
+        Document withTitleAttr = Jsoup.parse(
                 """
                 <article class="c-news-teaser">
                   <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
@@ -291,8 +292,18 @@ class ThiNewsClientAdapterTest {
                 """,
                 "https://www.thi.de"
         );
+        Document withLinkText = Jsoup.parse(
+                """
+                <article class="c-news-teaser">
+                  <time itemprop="datePublished" datetime="2026-10-01T10:00:00+02:00">01.10.2026</time>
+                  <a class="c-news-teaser__link" href="/news/link-text/">From link text</a>
+                </article>
+                """,
+                "https://www.thi.de"
+        );
 
-        assertEquals("From title attr", adapter.parse(document).getFirst().title());
+        assertEquals("From title attr", adapter.parse(withTitleAttr).getFirst().title());
+        assertEquals("From link text", adapter.parse(withLinkText).getFirst().title());
     }
 
     @Test
@@ -301,6 +312,41 @@ class ThiNewsClientAdapterTest {
                 IllegalArgumentException.class,
                 () -> new ThiNewsClientAdapter("/relative/presse/", 1000)
         );
+        assertThrows(
+                IllegalArgumentException.class,
+                () -> new ThiNewsClientAdapter("mailto:news@thi.de", 1000)
+        );
+    }
+
+    @Test
+    void shouldCoverSrcsetAndUrlHelpersDirectly() {
+        assertTrue(adapter.pickSrcsetUrl(null).isEmpty());
+        assertTrue(adapter.pickSrcsetUrl("   ").isEmpty());
+        assertEquals("/img-1100.webp", adapter.pickSrcsetUrl("/img-400.webp 400w, /img-1100.webp 1100w").orElseThrow());
+
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("noseparator").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("url ").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("  1100w").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("/img.webp w").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("/img.webp 12x").isEmpty());
+        assertTrue(ThiNewsClientAdapter.parseSrcsetEntry("/img.webp abcw").isEmpty());
+        assertEquals(
+                new ThiNewsClientAdapter.SrcsetCandidate("/img.webp", 1100),
+                ThiNewsClientAdapter.parseSrcsetEntry("/img.webp 1100w").orElseThrow()
+        );
+
+        assertNull(adapter.toAbsoluteUrl(null));
+        assertNull(adapter.toAbsoluteUrl("  "));
+        assertEquals("https://cdn.example/a", adapter.toAbsoluteUrl("https://cdn.example/a"));
+        assertEquals("http://cdn.example/a", adapter.toAbsoluteUrl("http://cdn.example/a"));
+        assertEquals("https://www.thi.de/a", adapter.toAbsoluteUrl("/a"));
+        assertEquals("https://www.thi.de/a", adapter.toAbsoluteUrl("a"));
+
+        assertNull(ThiNewsClientAdapter.textOrNull(null));
+        assertNull(ThiNewsClientAdapter.firstNonBlank(null, "  ", null));
+        assertEquals("ok", ThiNewsClientAdapter.firstNonBlank(null, "  ", "ok"));
+        assertEquals("https://www.thi.de", ThiNewsClientAdapter.originOf("https://www.thi.de/presse/"));
     }
 
     @Test
