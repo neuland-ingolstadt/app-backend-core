@@ -23,6 +23,7 @@ Quarkus Core API for **Neuland Backend 2.0** — auth, content, integrations, au
 This is a multi-module Maven (hexagonal architecture) project:
 
 - `adapters-inbound-rest` — JAX-RS resources implementing generated contract APIs
+- `adapters-outbound-http` — outbound HTTP adapters (e.g. THI news scraper)
 - `adapters-outbound-persistence` — persistence adapter
 - `application` — inbound/outbound ports and use cases
 - `bootstrap` — Quarkus application wiring all modules together

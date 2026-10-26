@@ -16,7 +16,15 @@
         </dependency>
         <dependency>
             <groupId>app.neuland</groupId>
+            <artifactId>adapters-outbound-http</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>app.neuland</groupId>
             <artifactId>adapters-outbound-persistence</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>io.quarkus</groupId>
+            <artifactId>quarkus-cache</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkus</groupId>
