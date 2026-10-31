@@ -3,6 +3,7 @@ name: Publish Docker image
 on:
   push:
     branches: [ main ]
+  workflow_dispatch:
 
 permissions:
   contents: read
@@ -11,6 +12,27 @@ env:
   BASE_IMAGE_NAME: ghcr.io/neuland-ingolstadt/app-backend-core
 
 jobs:
+  release_please:
+    name: Release PR / Tag
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
+    outputs:
+      releases_created: ${{ steps.release.outputs.releases_created }}
+      version: ${{ steps.release.outputs.version }}
+      major: ${{ steps.release.outputs.major }}
+      minor: ${{ steps.release.outputs.minor }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - name: Run release-please
+        uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: release-please-config.json
+          manifest-file: .release-please-manifest.json
+
   test:
     name: Test
     runs-on: ubuntu-latest
@@ -103,3 +125,31 @@ jobs:
           push: ${{ !startsWith(github.ref, 'refs/heads/dependabot/') && !startsWith(github.ref, 'refs/heads/renovate/') }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
+
+  tag-release:
+    name: Tag image with release version
+    needs: [ release_please, build ]
+    if: needs.release_please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
+
+      - name: Login to GHCR
+        uses: docker/login-action@dbcb813823bdd20940b903addbd779551569679f # v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Re-tags the image that the `build` job just pushed for this same commit.
+      # No rebuild: `imagetools create` only adds tag references to existing manifests.
+      - name: Add semver tags
+        run: |
+          docker buildx imagetools create \
+            --tag "${{ env.BASE_IMAGE_NAME }}:${{ needs.release_please.outputs.version }}" \
+            --tag "${{ env.BASE_IMAGE_NAME }}:${{ needs.release_please.outputs.major }}.${{ needs.release_please.outputs.minor }}" \
+            "${{ env.BASE_IMAGE_NAME }}:${{ github.ref_name }}-${{ github.run_number }}"
